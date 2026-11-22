@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>OpenMache — Achetez et Vendez Tout Localement</title>
+  <style>
+    /* =====================================================================
+       1. RESET & DESIGN TOKENS (100% SELF-CONTAINED, ZERO EXTERNAL CDNs)
+       ===================================================================== */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-subtle-hover: #e2e8f0;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --emerald-50: #ecfdf5;
+      --emerald-100: #d1fae5;
+      --emerald-200: #a7f3d0;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --emerald-800: #065f46;
+      --emerald-900: #064e3b;
+      --amber-50: #fffbeb;
+      --amber-100: #fef3c7;
+      --amber-200: #fde68a;
+      --amber-300: #fcd34d;
+      --amber-400: #fbbf24;
+      --amber-800: #92400e;
+      --amber-900: #78350f;
+      --amber-950: #451a03;
+      --sky-100: #e0f2fe;
+      --sky-700: #0369a1;
+      --sky-800: #075985;
+      --rose-600: #e11d48;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
+      --shadow-xl: 0 20px 44px rgba(15, 23, 42, 0.22);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Defensive SVG rule so icons NEVER blow up in iOS Quick Look */
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+      max-width: 100%;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .container {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+    }
+
+    /* =====================================================================
+       2. SMART AUTO-HIDE STICKY HEADER
+       ===================================================================== */
+    .main-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(0);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .main-header.is-hidden {
+      transform: translateY(-100%);
+    }
+
+    .header-top-row {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .brand-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    .brand-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      display: block;
+      line-height: 1.1;
+    }
+
+    .brand-name span {
+      color: var(--emerald-600);
+    }
+
+    .brand-tagline {
+      display: none;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @media (min-width: 640px) {
+      .brand-name { font-size: 21px; }
+      .brand-tagline { display: block; }
+    }
+
+    /* Desktop Search */
+    .desktop-search-wrap {
+      display: none;
+      flex: 1;
+      max-width: 440px;
+      position: relative;
+    }
+
+    @media (min-width: 820px) {
+      .desktop-search-wrap {
+        display: flex;
+      }
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 9px 34px 9px 36px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input:focus {
+      background: #ffffff;
+      border-color: var(--emerald-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+    }
+
+    .search-icon-left {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    /* Header Right Controls */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .currency-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-subtle);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+    }
+
+    .currency-btn {
+      padding: 6px 9px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+
+    .currency-btn.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    }
+
+    .rate-pill-desktop {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 10px;
+      border-radius: 11px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-900);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (min-width: 1080px) {
+      .rate-pill-desktop {
+        display: inline-flex;
+      }
+    }
+
+    .btn-post-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.24);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .btn-post-primary:hover {
+      background: var(--emerald-700);
+    }
+
+    .post-btn-suffix {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .post-btn-suffix {
+        display: inline;
+      }
+    }
+
+    /* Mobile Search & Rate Bar */
+    .mobile-subbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+    }
+
+    @media (min-width: 820px) {
+      .mobile-subbar {
+        display: none;
+      }
+    }
+
+    .mobile-search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .rate-pill-mobile {
+      padding: 8px 10px;
+      border-radius: 11px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-900);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* =====================================================================
+       3. MAIN LAYOUT & COMPACT HERO BANNER
+       ===================================================================== */
+    .main-content {
+      padding-top: 124px;
+      padding-bottom: 40px;
+    }
+
+    .hero-banner {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(125deg, #064e3b 0%, #065f46 52%, #115e59 100%);
+      color: #ffffff;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 22px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-banner {
+        padding: 32px 36px;
+      }
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    @media (min-width: 960px) {
+      .hero-grid {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .hero-copy {
+      max-width: 650px;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 11px;
+      font-weight: 700;
+      color: #d1fae5;
+      margin-bottom: 12px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .hero-title {
+        font-size: 32px;
+      }
+    }
+
+    .hero-title .highlight {
+      color: var(--amber-300);
+    }
+
+    .hero-desc {
+      font-size: 14px;
+      color: rgba(236, 253, 245, 0.9);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #d1fae5;
+    }
+
+    .hero-stat-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    /* Monetization Boost Card */
+    .boost-promo-card {
+      background: rgba(255, 255, 255, 0.11);
+      border: 1px solid rgba(252, 211, 77, 0.35);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 960px) {
+      .boost-promo-card {
+        max-width: 310px;
+        flex-shrink: 0;
+      }
+    }
+
+    .boost-promo-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .badge-gold {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--amber-400);
+      color: var(--amber-950);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .boost-price-tag {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--amber-200);
+    }
+
+    .boost-promo-text {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.95);
+      line-height: 1.45;
+    }
+
+    .btn-boost-cta {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 11px;
+      background: var(--amber-400);
+      color: var(--amber-950);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      transition: background 0.15s;
+    }
+
+    .btn-boost-cta:hover {
+      background: var(--amber-300);
+    }
+
+    /* =====================================================================
+       4. CATEGORY PILLS & FILTER TOOLBAR
+       ===================================================================== */
+    .filters-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .category-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .category-pills-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid var(--border-light);
+      transition: all 0.15s;
+    }
+
+    .cat-pill.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+      border-color: var(--emerald-600);
+      box-shadow: 0 3px 8px rgba(5, 150, 105, 0.22);
+    }
+
+    .filter-toolbar {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (min-width: 700px) {
+      .filter-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .filter-controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .select-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .select-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .filter-status-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 12px;
+    }
+
+    .results-count {
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .reset-link {
+      color: var(--text-muted);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    /* =====================================================================
+       5. RESPONSIVE PRODUCT LISTINGS GRID & CARDS
+       ===================================================================== */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 560px) {
+      .listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .listings-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1180px) {
+      .listings-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: #34d399;
+    }
+
+    .product-card.is-featured {
+      border-color: var(--amber-300);
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.28), var(--shadow-md);
+    }
+
+    .card-media {
+      position: relative;
+      width: 100%;
+      height: 175px;
+      background: var(--bg-subtle);
+      overflow: hidden;
+    }
+
+    .card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-badges-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge-condition {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--text-main);
+      font-size: 10.5px;
+      font-weight: 800;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .badge-category-bottom {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.78);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 14px 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .price-primary {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--emerald-700);
+      letter-spacing: -0.02em;
+    }
+
+    .price-secondary {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .card-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    /* Per-Card Language Selector */
+    .card-lang-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding-top: 4px;
+    }
+
+    .card-lang-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .lang-btn-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .lang-mini-btn {
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      transition: all 0.12s;
+    }
+
+    .lang-mini-btn.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+    }
+
+    .card-footer {
+      border-top: 1px solid var(--bg-subtle);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-area {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: #334155;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-time {
+      font-size: 11px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .card-seller {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge-verified-mini {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--sky-700);
+      flex-shrink: 0;
+    }
+
+    .badge-local-mini {
+      font-size: 11px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    /* Empty State */
+    .empty-state-box {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-icon-circle {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 12px;
+      border-radius: 16px;
+      background: var(--bg-subtle);
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin: 0 auto 16px;
+    }
+
+    .empty-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* =====================================================================
+       6. MODALS (POST ITEM, ITEM DETAILS, EXCHANGE RATE)
+       ===================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+    }
+
+    .modal-card.wide {
+      max-width: 650px;
+    }
+
+    .modal-card.narrow {
+      max-width: 390px;
+      padding: 22px;
+      gap: 14px;
+    }
+
+    .modal-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--bg-subtle);
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .modal-close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(226, 232, 240, 0.85);
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .modal-body-scroll {
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 540px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .form-control:focus {
+      background: #ffffff;
+      border-color: var(--emerald-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    }
+
+    .photo-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .photo-preview-box {
+      width: 74px;
+      height: 74px;
+      border-radius: 16px;
+      background: var(--bg-subtle);
+      border: 2px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .photo-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .boost-checkbox-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      cursor: pointer;
+    }
+
+    .modal-footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 6px;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--bg-subtle);
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.22);
+    }
+
+    /* Detail Modal Specifics */
+    .detail-hero-wrap {
+      position: relative;
+      height: 220px;
+      width: 100%;
+      background: var(--bg-subtle);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .detail-hero-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .detail-close-floating {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--text-main);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+
+    .detail-top-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .detail-price-card {
+      background: var(--emerald-50);
+      border: 1px solid var(--emerald-200);
+      padding: 10px 16px;
+      border-radius: 16px;
+    }
+
+    .detail-price-main {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--emerald-700);
+    }
+
+    .detail-price-sub {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--emerald-800);
+    }
+
+    .modal-translate-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .seller-box {
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .seller-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .safety-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-950);
+      font-size: 12px;
+    }
+
+    .safety-box ul {
+      margin-top: 4px;
+      padding-left: 18px;
+      color: var(--amber-900);
+    }
+
+    .contact-actions-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 540px) {
+      .contact-actions-row {
+        flex-direction: row;
+      }
+    }
+
+    .btn-whatsapp {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-copy-phone {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border-light);
+      background: #ffffff;
+      padding: 24px 0;
+      margin-top: 32px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    @media (min-width: 720px) {
+      .footer-inner {
+        flex-direction: row;
+        text-align: left;
+      }
+    }
+
+    /* Toast */
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      z-index: 80;
+      display: flex;
+      justify-content: flex-end;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-pill {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 11px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       SMART AUTO-HIDE STICKY NAVBAR
+       ===================================================================== -->
+  <header id="mainHeader" class="main-header">
+    <div class="container">
+      <div class="header-top-row">
+        <!-- Brand Logo -->
+        <button type="button" onclick="resetFilters()" class="brand-btn">
+          <div class="brand-icon-box">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div>
+            <span class="brand-name">Open<span>Mache</span></span>
+            <span id="headerTagline" class="brand-tagline">Achetez et vendez tout localement</span>
+          </div>
+        </button>
+
+        <!-- Desktop Search -->
+        <div class="desktop-search-wrap">
+          <svg class="search-icon-left" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+          <input
+            id="desktopSearchInput"
+            type="text"
+            class="search-input"
+            placeholder="Rechercher téléphones, chaussures, nourriture, services, Delmas..."
+            aria-label="Rechercher sur OpenMache"
+          />
+          <button type="button" id="clearDesktopSearch" onclick="clearSearchInput()" class="search-clear-btn hidden" aria-label="Effacer">✕</button>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="header-actions">
+          <div class="currency-toggle" role="group" aria-label="Devise">
+            <button type="button" id="btnCurrencyHTG" onclick="setDisplayCurrency('HTG')" class="currency-btn active">HTG (G)</button>
+            <button type="button" id="btnCurrencyUSD" onclick="setDisplayCurrency('USD')" class="currency-btn">USD ($)</button>
+          </div>
+
+          <button type="button" onclick="openRateModal()" class="rate-pill-desktop" title="Modifier le taux de change">
+            <span>1 USD = <strong id="headerRateText">132</strong> HTG</span>
+          </button>
+
+          <button type="button" onclick="openPostModal()" class="btn-post-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span id="postBtnText">Publier<span class="post-btn-suffix"> un article</span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Search & Rate Bar -->
+      <div class="mobile-subbar">
+        <div class="mobile-search-wrap">
+          <svg class="search-icon-left" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+          <input
+            id="mobileSearchInput"
+            type="text"
+            class="search-input"
+            placeholder="Rechercher articles ou quartiers..."
+            aria-label="Rechercher articles"
+          />
+          <button type="button" id="clearMobileSearch" onclick="clearSearchInput()" class="search-clear-btn hidden" aria-label="Effacer">✕</button>
+        </div>
+        <button type="button" onclick="openRateModal()" class="rate-pill-mobile">
+          $1=<span id="mobileRateText">132</span>G
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN CONTENT
+       ===================================================================== -->
+  <main id="mainContent" class="main-content container">
+
+    <!-- HERO & MONETIZATION BANNER -->
+    <section class="hero-banner">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-pill">
+            <span class="pulse-dot"></span>
+            <span id="heroBadgeText">Place de marché locale ouverte • Annonces de base 100 % gratuites</span>
+          </div>
+
+          <h1 id="heroTitleText" class="hero-title">
+            Vendez tout ce que vous avez localement — <span class="highlight">publication gratuite.</span>
+          </h1>
+
+          <p id="heroDescText" class="hero-desc">
+            Transformez vos appareils électroniques, vêtements, produits faits maison ou services du quotidien en liquidités. Publiez en 30 secondes et discutez directement avec des acheteurs proches sur WhatsApp.
+          </p>
+
+          <div class="hero-stats">
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span><strong id="heroActiveCount">8</strong> <span id="heroActiveLabel">Annonces locales actives</span></span>
+            </span>
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span id="heroZeroFeeLabel">Zéro frais de publication</span>
+            </span>
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span id="heroWhatsappLabel">Contact direct WhatsApp</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="boost-promo-card">
+          <div class="boost-promo-top">
+            <span id="boostCardBadge" class="badge-gold">★ Mise en avant</span>
+            <span id="boostPromoPrice" class="boost-price-tag">Dès 264 HTG</span>
+          </div>
+          <p id="boostCardDesc" class="boost-promo-text">
+            Vous voulez vendre plus vite ? Épinglez votre annonce en haut de l'accueil avec un badge doré <strong>En vedette</strong> pendant 7 jours.
+          </p>
+          <button type="button" id="boostCardCta" onclick="openPostModal(true)" class="btn-boost-cta">
+            Tester une annonce en vedette →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORY PILLS & FILTERS -->
+    <section class="filters-section">
+      <div id="categoryPills" class="category-pills-row"></div>
+
+      <div class="filter-toolbar">
+        <div class="filter-controls-group">
+          <div class="select-group">
+            <label for="areaFilter" id="areaLabel" class="select-label">Zone :</label>
+            <select id="areaFilter" onchange="handleFilterChange()" class="filter-select">
+              <option value="all" data-i18n-opt="allAreas">Toutes les zones</option>
+              <option value="Port-au-Prince">Port-au-Prince</option>
+              <option value="Pétion-Ville">Pétion-Ville</option>
+              <option value="Delmas">Delmas</option>
+              <option value="Carrefour">Carrefour</option>
+              <option value="Tabarre">Tabarre</option>
+              <option value="Cap-Haïtien">Cap-Haïtien</option>
+              <option value="Other" data-i18n-opt="otherArea">Autre</option>
+            </select>
+          </div>
+
+          <div class="select-group">
+            <label for="sortFilter" id="sortLabel" class="select-label">Trier :</label>
+            <select id="sortFilter" onchange="handleFilterChange()" class="filter-select">
+              <option value="featured" data-i18n-opt="sortFeatured">En vedette d'abord</option>
+              <option value="newest" data-i18n-opt="sortNewest">Plus récents</option>
+              <option value="price-asc" data-i18n-opt="sortPriceAsc">Prix : croissant</option>
+              <option value="price-desc" data-i18n-opt="sortPriceDesc">Prix : décroissant</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-status-group">
+          <span id="resultsCountLabel" class="results-count">Affichage de 8 articles</span>
+          <button type="button" id="resetDemoBtn" onclick="confirmResetDemo()" class="reset-link">
+            Réinitialiser la démo
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT LISTINGS GRID -->
+    <section>
+      <div id="emptyState" class="empty-state-box hidden">
+        <div class="empty-icon-circle">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+        </div>
+        <h3 id="emptyTitle" class="empty-title">Aucun article ne correspond à votre recherche</h3>
+        <p id="emptyDesc" class="empty-desc">
+          Essayez d'effacer vos filtres ou soyez le premier à publier cet article dans votre quartier !
+        </p>
+        <div class="empty-actions">
+          <button type="button" id="emptyClearBtn" onclick="resetFilters()" class="btn-secondary">Effacer les filtres</button>
+          <button type="button" id="emptyPostBtn" onclick="openPostModal()" class="btn-primary">+ Publier un article</button>
+        </div>
+      </div>
+
+      <div id="listingsGrid" class="listings-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       FOOTER
+       ===================================================================== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong style="color:#0f172a;font-size:14px;">Open<span style="color:#059669;">Mache</span></strong> •
+        <span id="footerTagline">Place de marché locale d'achat et de vente</span>
+      </div>
+      <p id="footerSafetyText">Rencontrez-vous dans des lieux publics sûrs et vérifiez l'article avant de payer.</p>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       MODAL 1: POST AN ITEM
+       ===================================================================== -->
+  <div id="postModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 id="postModalTitle" class="modal-title">Publier un article à vendre</h2>
+          <p id="postModalSubtitle" class="modal-subtitle">Publication gratuite • Apparaît immédiatement en ligne</p>
+        </div>
+        <button type="button" onclick="closePostModal()" class="modal-close-btn" aria-label="Fermer">✕</button>
+      </div>
+
+      <form id="postItemForm" onsubmit="handlePostSubmit(event)" class="modal-body-scroll">
+        <div>
+          <label id="postPhotoLabel" class="form-label">Photo de l'article (Facultatif)</label>
+          <div class="photo-upload-row">
+            <div id="imagePreviewBox" class="photo-preview-box">
+              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <input id="itemImageInput" type="file" accept="image/*" onchange="handleImageUpload(event)" style="font-size:12px;width:100%;" />
+              <p id="postPhotoHint" style="font-size:11px;color:#64748b;margin-top:4px;">Ajoutez une photo ou laissez vide pour utiliser une illustration automatique par catégorie.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="itemTitle" id="postTitleLabel" class="form-label">Titre *</label>
+          <input id="itemTitle" type="text" required class="form-control" placeholder="Ex. : Samsung Galaxy A54, Pack d'eau fraîche, Tresse..." />
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemCategory" id="postCategoryLabel" class="form-label">Catégorie *</label>
+            <select id="itemCategory" required class="form-control">
+              <option value="Electronics" data-i18n-opt="catElectronics">Électronique</option>
+              <option value="Fashion & Shoes" data-i18n-opt="catFashion">Mode & Chaussures</option>
+              <option value="Home & Furniture" data-i18n-opt="catHome">Maison & Meubles</option>
+              <option value="Vehicles & Parts" data-i18n-opt="catVehicles">Véhicules & Pièces</option>
+              <option value="Food & Goods" data-i18n-opt="catFood">Alimentation & Produits</option>
+              <option value="Services" data-i18n-opt="catServices">Services</option>
+              <option value="Other" data-i18n-opt="catOther">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="itemCondition" id="postConditionLabel" class="form-label">État *</label>
+            <select id="itemCondition" required class="form-control">
+              <option value="New" data-i18n-opt="condNew">Neuf</option>
+              <option value="Like New" data-i18n-opt="condLikeNew">Comme neuf</option>
+              <option value="Used" data-i18n-opt="condUsed">Occasion</option>
+              <option value="Service" data-i18n-opt="condService">Service</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemPrice" id="postPriceLabel" class="form-label">Prix *</label>
+            <input id="itemPrice" type="number" min="1" step="any" required class="form-control" placeholder="Ex. : 5000" />
+          </div>
+
+          <div>
+            <label for="itemInputCurrency" id="postCurrencyLabel" class="form-label">Devise du prix *</label>
+            <select id="itemInputCurrency" class="form-control">
+              <option value="HTG">HTG (Gourdes - G)</option>
+              <option value="USD">USD (Dollars - $)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemArea" id="postAreaLabel" class="form-label">Quartier / Zone *</label>
+            <select id="itemArea" required class="form-control">
+              <option value="Port-au-Prince">Port-au-Prince</option>
+              <option value="Pétion-Ville">Pétion-Ville</option>
+              <option value="Delmas">Delmas</option>
+              <option value="Carrefour">Carrefour</option>
+              <option value="Tabarre">Tabarre</option>
+              <option value="Cap-Haïtien">Cap-Haïtien</option>
+              <option value="Other" data-i18n-opt="otherArea">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="itemSeller" id="postSellerLabel" class="form-label">Votre nom / Boutique *</label>
+            <input id="itemSeller" type="text" required class="form-control" placeholder="Ex. : Jean B. ou Lakay Électronique" />
+          </div>
+        </div>
+
+        <div>
+          <label for="itemPhone" id="postPhoneLabel" class="form-label">Numéro WhatsApp / Téléphone *</label>
+          <input id="itemPhone" type="tel" required class="form-control" placeholder="Ex. : +509 3712 4589" />
+        </div>
+
+        <div>
+          <label for="itemDescription" id="postDescLabel" class="form-label">Description *</label>
+          <textarea id="itemDescription" rows="3" required class="form-control" placeholder="Décrivez l'état, le lieu de retrait, la livraison ou les détails..."></textarea>
+        </div>
+
+        <label class="boost-checkbox-box">
+          <input id="itemFeaturedCheck" type="checkbox" style="margin-top:3px;width:16px;height:16px;accent-color:#f59e0b;" />
+          <div style="font-size:12px;">
+            <strong id="postBoostTitle" style="color:#451a03;display:block;">Aperçu badge mis en avant (+En vedette)</strong>
+            <span id="postBoostDesc" style="color:#92400e;">Simule un placement prioritaire payant (ex. : 264 HTG / 2 $ USD) pour épingler l'annonce en haut avec un badge doré.</span>
+          </div>
+        </label>
+
+        <div class="modal-footer-actions">
+          <button type="button" id="postCancelBtn" onclick="closePostModal()" class="btn-secondary">Annuler</button>
+          <button type="submit" id="postSubmitBtn" class="btn-primary">Publier l'annonce</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: ITEM DETAILS & CONTACT SELLER
+       ===================================================================== -->
+  <div id="detailModal" class="modal-backdrop hidden">
+    <div class="modal-card wide">
+      <div class="detail-hero-wrap">
+        <button type="button" onclick="closeDetailModal()" class="detail-close-floating" aria-label="Fermer">✕</button>
+        <div id="detailVisual" style="width:100%;height:100%;"></div>
+      </div>
+
+      <div class="modal-body-scroll">
+        <div class="detail-top-flex">
+          <div style="flex:1;min-width:210px;">
+            <div id="detailBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+            <h2 id="detailTitle" style="font-size:20px;font-weight:900;line-height:1.25;margin-bottom:4px;">Titre</h2>
+            <p id="detailLocationTime" style="font-size:12px;color:#64748b;font-weight:600;">Delmas • Il y a 1 h</p>
+
+            <!-- Per-Product Translation Bar -->
+            <div class="modal-translate-bar">
+              <span id="modalTranslateLabel" style="font-size:11px;font-weight:700;color:#64748b;">Traduire la fiche :</span>
+              <button type="button" data-lang-btn="FR" onclick="handleModalLanguageChange('FR')" class="modal-lang-btn lang-mini-btn active">FR</button>
+              <button type="button" data-lang-btn="EN" onclick="handleModalLanguageChange('EN')" class="modal-lang-btn lang-mini-btn">EN</button>
+              <button type="button" data-lang-btn="ES" onclick="handleModalLanguageChange('ES')" class="modal-lang-btn lang-mini-btn">ES</button>
+              <button type="button" data-lang-btn="HT" onclick="handleModalLanguageChange('HT')" class="modal-lang-btn lang-mini-btn">HT</button>
+              <span id="detailTranslationStatus" style="font-size:11px;font-weight:600;color:#047857;"></span>
+            </div>
+          </div>
+
+          <div class="detail-price-card">
+            <div id="detailPrimaryPrice" class="detail-price-main">6 600 HTG</div>
+            <div id="detailSecondaryPrice" class="detail-price-sub">≈ $50 USD</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 id="detailDescHeading" class="form-label">Description</h3>
+          <p id="detailDescription" style="font-size:14px;color:#334155;line-height:1.6;"></p>
+        </div>
+
+        <div class="seller-box">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div id="detailSellerAvatar" class="seller-avatar">OM</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span id="detailSellerName" style="font-weight:800;font-size:14px;">Vendeur</span>
+                <span id="detailVerifiedTag" class="hidden" style="padding:2px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:10px;font-weight:800;">✓ Vendeur vérifié</span>
+              </div>
+              <p id="detailPhoneDisplay" style="font-size:12px;color:#64748b;font-weight:600;">+509 3700 0000</p>
+            </div>
+          </div>
+
+          <button type="button" id="detailBoostBtn" onclick="toggleBoostFromDetail()" style="padding:8px 12px;border-radius:11px;font-size:12px;font-weight:800;">
+            ★ Mettre en avant
+          </button>
+        </div>
+
+        <div class="safety-box">
+          <div id="detailSafetyHeading" style="font-weight:800;">🛡️ Conseils de sécurité pour les rencontres locales</div>
+          <ul id="detailSafetyList">
+            <li>Rencontrez-vous dans des lieux publics fréquentés et bien éclairés (places, supermarchés, stations-service).</li>
+            <li>Inspectez et testez l'article soigneusement avant de payer en espèces ou par transfert mobile.</li>
+          </ul>
+        </div>
+
+        <div class="contact-actions-row">
+          <a id="whatsappContactBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z" />
+            </svg>
+            <span id="whatsappBtnText">Contacter sur WhatsApp</span>
+          </a>
+
+          <button type="button" id="copyPhoneBtn" onclick="copySellerPhone()" class="btn-copy-phone">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span id="copyPhoneBtnText">Copier le numéro</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: EDIT EXCHANGE RATE
+       ===================================================================== -->
+  <div id="rateModal" class="modal-backdrop hidden">
+    <div class="modal-card narrow">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 id="rateModalTitle" class="modal-title">Taux de change</h3>
+        <button type="button" onclick="closeRateModal()" style="color:#64748b;padding:4px;font-weight:800;">✕</button>
+      </div>
+      <p id="rateModalDesc" style="font-size:12.5px;color:#64748b;">
+        Ajustez le taux de conversion utilisé sur OpenMache pour afficher les prix en Gourdes haïtiennes (HTG) ou en Dollars américains (USD).
+      </p>
+      <div>
+        <label for="rateInput" id="rateInputLabel" class="form-label">1 USD équivaut à (HTG)</label>
+        <input id="rateInput" type="number" min="1" step="0.5" value="132" class="form-control" style="font-weight:800;font-size:16px;" />
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" id="rateCancelBtn" onclick="closeRateModal()" class="btn-secondary">Annuler</button>
+        <button type="button" id="rateSaveBtn" onclick="saveExchangeRate()" class="btn-primary">Mettre à jour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       TOAST NOTIFICATION
+       ===================================================================== -->
+  <div id="toastBox" class="toast-banner">
+    <div class="toast-pill">
+      <span style="width:9px;height:9px;border-radius:50%;background:#34d399;display:inline-block;"></span>
+      <span id="toastMessage">Annonce publiée !</span>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ===================================================================== -->
+  <script>
+    const STORAGE_KEY = "openmache_listings_v2_fr";
+    const RATE_STORAGE_KEY = "openmache_rate_v1";
+
+    const CATEGORIES = [
+      "All",
+      "Electronics",
+      "Fashion & Shoes",
+      "Home & Furniture",
+      "Vehicles & Parts",
+      "Food & Goods",
+      "Services",
+      "Other"
+    ];
+
+    const UI_TEXT = {
+      fr: {
+        featuredBadge: "★ En vedette",
+        boostActiveBtn: "★ En vedette actif",
+        boostInactiveBtn: "★ Mettre en avant",
+        detailLocalSeller: "Vendeur local",
+        catLabels: {
+          "All": "Tout",
+          "Electronics": "Électronique",
+          "Fashion & Shoes": "Mode & Chaussures",
+          "Home & Furniture": "Maison & Meubles",
+          "Vehicles & Parts": "Véhicules & Pièces",
+          "Food & Goods": "Alimentation & Produits",
+          "Services": "Services",
+          "Other": "Autre"
+        },
+        condLabels: {
+          "New": "Neuf",
+          "Like New": "Comme neuf",
+          "Used": "Occasion",
+          "Service": "Service"
+        },
+        showingItems: (n) => `Affichage de ${n} article${n === 1 ? "" : "s"}`,
+        translatedBadge: (lang) => `Traduit (${lang})`,
+        translatingBadge: "Traduction..."
+      }
+    };
+
+    const DEFAULT_LISTINGS = [
+      {
+        id: 101,
+        priceUSD: 440,
+        condition: "Like New",
+        category: "Electronics",
+        area: "Pétion-Ville",
+        seller: "Marc-Antoine Tech",
+        verified: true,
+        featured: true,
+        phone: "+509 3714 8820",
+        postedAt: "Il y a 1 h",
+        createdAt: Date.now() - 3600000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "iPhone 13 Pro — 256 Go Graphite (Débloqué)",
+            description: "iPhone 13 Pro débloqué tout opérateur en excellent état, santé batterie à 89 %, Face ID parfait. Livré avec chargeur rapide et coque de protection. Remise en main propre à la Place Saint-Pierre."
+          },
+          EN: {
+            title: "iPhone 13 Pro — 256GB Graphite (Unlocked)",
+            description: "Factory unlocked iPhone 13 Pro in clean condition, 89% battery health, Face ID working perfectly. Includes fast charger and protective case. Meetup at Place Saint-Pierre."
+          },
+          ES: {
+            title: "iPhone 13 Pro — 256 GB Grafito (Liberado)",
+            description: "iPhone 13 Pro liberado de fábrica en excelente estado, batería al 89 %, Face ID funcionando perfectamente. Incluye cargador rápido y funda protectora. Entrega en Place Saint-Pierre."
+          },
+          HT: {
+            title: "iPhone 13 Pro — 256 Go Gri (Debloke)",
+            description: "iPhone 13 Pro debloke pou tout rezo an bèl eta, batri a 89 %, Face ID mache byen. Li vini ak chajè rapid ak kouvèti. Rankontre sou Plas Sen Pyè."
+          }
+        }
+      },
+      {
+        id: 102,
+        priceUSD: 6.5,
+        condition: "New",
+        category: "Food & Goods",
+        area: "Delmas",
+        seller: "Famille Pierre Depot",
+        verified: true,
+        featured: true,
+        phone: "+509 3490 1122",
+        postedAt: "Il y a 2 h",
+        createdAt: Date.now() - 7200000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Pack d'eau potable fraîche & glaçons (24 bouteilles)",
+            description: "Eau purifiée 500 ml en pack de 24 bouteilles plus 2 grands sacs de glaçons. Idéal pour événements, boutiques ou provisions maison. Livraison moto le jour même autour de Delmas 33–75."
+          },
+          EN: {
+            title: "Cold Bottled Water & Ice Pack Bundle (24-Pack)",
+            description: "Purified drinking water 500ml 24-pack plus 2 large bags of crystal ice. Great for events, shops, or home stock. Same-day moto delivery available around Delmas 33–75."
+          },
+          ES: {
+            title: "Paquete de agua potable fría y hielo (24 botellas)",
+            description: "Agua purificada de 500 ml en paquete de 24 botellas más 2 bolsas grandes de hielo. Ideal para eventos, tiendas o casa. Entrega en moto el mismo día por Delmas 33–75."
+          },
+          HT: {
+            title: "Pakèt dlo potab frèt ak glas (24 boutèy)",
+            description: "Dlo pirifye 500 ml pakèt 24 boutèy plis 2 gwo sache glas. Bon pou fèt, boutik oswa pwovizyon lakay. Livrezon moto menm jou a nan zòn Delmas 33–75."
+          }
+        }
+      },
+      {
+        id: 103,
+        priceUSD: 38,
+        condition: "New",
+        category: "Fashion & Shoes",
+        area: "Port-au-Prince",
+        seller: "Claudette Boutique",
+        verified: true,
+        featured: false,
+        phone: "+509 3822 9041",
+        postedAt: "Il y a 3 h",
+        createdAt: Date.now() - 10800000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Baskets de course légères femme — Pointure 39",
+            description: "Baskets neuves respirantes et légères blanches avec accents menthe. Très bon amorti pour la marche ou le sport. Pointures 38, 39 et 40 disponibles."
+          },
+          EN: {
+            title: "Women's Air Running Sneakers — Size 39",
+            description: "Brand new breathable lightweight sneakers in white & mint accent. Comfortable cushioning for walking or gym. Sizes 38, 39, and 40 in stock."
+          },
+          ES: {
+            title: "Zapatillas deportivas ligeras para mujer — Talla 39",
+            description: "Zapatillas nuevas, transpirables y ligeras en blanco con detalles menta. Buena amortiguación para caminar o gimnasio. Tallas 38, 39 y 40 disponibles."
+          },
+          HT: {
+            title: "Baskèt kous lejè pou fanm — Pointi 39",
+            description: "Baskèt nèf ki lejè anpil, koulè blan ak vè mant. Bon kousen pou mache oswa fè espò. Pointi 38, 39 ak 40 disponib."
+          }
+        }
+      },
+      {
+        id: 104,
+        priceUSD: 32,
+        condition: "New",
+        category: "Electronics",
+        area: "Tabarre",
+        seller: "Solèy Gadgets",
+        verified: false,
+        featured: true,
+        phone: "+509 4105 6639",
+        postedAt: "Il y a 4 h",
+        createdAt: Date.now() - 14400000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Batterie externe solaire 30 000 mAh + Lampe LED",
+            description: "Batterie de secours solaire robuste avec 3 ports USB, charge rapide Type-C et lampe de secours lumineuse. Recharge 2 téléphones en même temps pendant les coupures."
+          },
+          EN: {
+            title: "30,000mAh Solar Power Bank + Dual LED Lamp",
+            description: "Heavy-duty solar backup battery with 3 USB outputs, Type-C fast charge, and bright emergency camping light. Charges 2 phones simultaneously during power outages."
+          },
+          ES: {
+            title: "Batería solar de 30 000 mAh + Lámpara LED doble",
+            description: "Batería solar resistente con 3 salidas USB, carga rápida Tipo-C y luz de emergencia brillante. Carga 2 teléfonos a la vez durante cortes de energía."
+          },
+          HT: {
+            title: "Power bank solè 30,000mAh + Lanp LED",
+            description: "Batri solè solid ki gen 3 pò USB, chaj rapid Type-C ak lanp sekou klere. Li chaje 2 telefòn anmenmtan lè kouran koupe."
+          }
+        }
+      },
+      {
+        id: 105,
+        priceUSD: 890,
+        condition: "Used",
+        category: "Vehicles & Parts",
+        area: "Carrefour",
+        seller: "Emmanuel Auto-Moto",
+        verified: true,
+        featured: false,
+        phone: "+509 3611 7490",
+        postedAt: "Il y a 5 h",
+        createdAt: Date.now() - 18000000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Moto Haojue 150 cm³ — Papiers en règle",
+            description: "Moto 150 cm³ bien entretenue, faible consommation d'essence, pneu arrière et batterie neufs posés le mois dernier. Carte d'immatriculation et plaque en règle."
+          },
+          EN: {
+            title: "150cc Haojue Commuter Moto — Clean Papers",
+            description: "Well-maintained 150cc motorcycle, low fuel consumption, new rear tire and battery installed last month. Registration card and plate in order."
+          },
+          ES: {
+            title: "Moto Haojue 150 cc — Papeles al día",
+            description: "Motocicleta 150 cc bien cuidada, bajo consumo de combustible, llanta trasera y batería nuevas instaladas el mes pasado. Matrícula y papeles en regla."
+          },
+          HT: {
+            title: "Motosiklèt Haojue 150cc — Papye an règ",
+            description: "Moto 150cc ki byen antreteni, li pa konsome anpil gaz, kawotchou dèyè ak batri nèf mwa pase. Kat ak plak an règ."
+          }
+        }
+      },
+      {
+        id: 106,
+        priceUSD: 14,
+        condition: "New",
+        category: "Food & Goods",
+        area: "Pétion-Ville",
+        seller: "Manman Rose Kitchen",
+        verified: true,
+        featured: false,
+        phone: "+509 3944 2180",
+        postedAt: "Il y a 6 h",
+        createdAt: Date.now() - 21600000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Coffret de pâtés haïtiens maison & tablettes (12 pièces)",
+            description: "Pâtés feuilletés fraîchement préparés (poulet, bœuf ou hareng fumé) + tablettes coco. Préparés sur commande chaque matin pour réunions de famille ou bureaux."
+          },
+          EN: {
+            title: "Homemade Haitian Patties & Sweet Pastries Box (12 pcs)",
+            description: "Freshly baked flaky pâtés (chicken, beef, or smoked herring) + coconut tablets. Baked to order every morning for family gatherings or office lunches."
+          },
+          ES: {
+            title: "Caja de empanadas haitianas caseras y dulces (12 pzas)",
+            description: "Empanadas hojaldradas recién horneadas (pollo, res o arenque ahumado) + tabletas de coco. Hechas por encargo cada mañana para reuniones o oficina."
+          },
+          HT: {
+            title: "Bwat paté ayisyen endijèn ak tablèt (12 moso)",
+            description: "Paté fèy fre ki sot nan fou (poul, vyann bèf oswa aran sori) + tablèt kokoye. Yo fèt sou kòmand chak maten pou rankont fanmi oswa biwo."
+          }
+        }
+      },
+      {
+        id: 107,
+        priceUSD: 20,
+        condition: "Service",
+        category: "Services",
+        area: "Delmas",
+        seller: "Junior IT Solutions",
+        verified: true,
+        featured: false,
+        phone: "+509 4720 3315",
+        postedAt: "Il y a 8 h",
+        createdAt: Date.now() - 28800000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Réparation écran PC/téléphone & installation Windows/Office",
+            description: "Diagnostic rapide, remplacement de batterie, nettoyage et installation de logiciels pour HP, Dell, Lenovo et MacBook. Déplacement à domicile ou au bureau possible."
+          },
+          EN: {
+            title: "Laptop & Phone Screen Repair + Windows/Office Setup",
+            description: "Fast diagnostics, battery replacements, virus cleanup, and software installation for HP, Dell, Lenovo, and MacBooks. Home or office visits available."
+          },
+          ES: {
+            title: "Reparación de pantalla de laptop/teléfono e instalación Windows/Office",
+            description: "Diagnóstico rápido, cambio de batería, limpieza e instalación de programas para HP, Dell, Lenovo y MacBook. Atención a domicilio o en oficina."
+          },
+          HT: {
+            title: "Reparasyon ekran laptop/telefòn & enstalasyon Windows/Office",
+            description: "Dyagnostik rapid, chanjman batri, netwayaj ak enstalasyon pwogram pou HP, Dell, Lenovo ak MacBook. Nou ka vin lakay ou oswa nan biwo."
+          }
+        }
+      },
+      {
+        id: 108,
+        priceUSD: 68,
+        condition: "New",
+        category: "Home & Furniture",
+        area: "Cap-Haïtien",
+        seller: "Lakay Comfort Store",
+        verified: false,
+        featured: false,
+        phone: "+509 3518 9904",
+        postedAt: "Il y a 10 h",
+        createdAt: Date.now() - 36000000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "Ventilateur sur pied rechargeable 16 pouces (AC/DC)",
+            description: "Ventilateur sur pied silencieux 3 vitesses avec batterie 12V intégrée (jusqu'à 7 h en vitesse basse) et veilleuse. Idéal pour les nuits chaudes."
+          },
+          EN: {
+            title: "16-Inch Rechargeable Standing Fan (AC/DC)",
+            description: "Quiet 3-speed standing fan with built-in 12V battery (lasts up to 7 hours on low) and night light. Essential for warm nights."
+          },
+          ES: {
+            title: "Ventilador de pedestal recargable de 16 pulgadas (AC/DC)",
+            description: "Ventilador silencioso de 3 velocidades con batería de 12V integrada (hasta 7 horas en baja) y luz nocturna. Ideal para noches calurosas."
+          },
+          HT: {
+            title: "Fantil sou pye rechajab 16 pous (AC/DC)",
+            description: "Fantil 3 vitès ki pa fè bri, li gen batri 12V ladan l (jiska 7 èdtan sou vitès dous) ak ti limyè lannwit. Trè itil lè gen chalè."
+          }
+        }
+      }
+    ];
+
+    // State
+    let listings = [];
+    let exchangeRate = 132;
+    let displayCurrency = "HTG";
+    let activeCategory = "All";
+    let searchQuery = "";
+    let activeDetailItem = null;
+    let modalTranslationLang = "FR";
+    let cardLanguages = {};
+    let translationCache = {};
+    let uploadedImageBase64 = null;
+
+    // Auto-hide header scroll state
+    let lastScrollY = 0;
+    let isHeaderHidden = false;
+    let scrollTicking = false;
+
+    function isAnyModalOpen() {
+      return ["postModal", "detailModal", "rateModal"].some((id) => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+      });
+    }
+
+    function setHeaderVisibility(hide) {
+      const header = document.getElementById("mainHeader");
+      if (!header || isHeaderHidden === hide) return;
+      isHeaderHidden = hide;
+      header.classList.toggle("is-hidden", hide);
+    }
+
+    function syncMainTopOffset() {
+      const header = document.getElementById("mainHeader");
+      const main = document.getElementById("mainContent");
+      if (!header || !main) return;
+      const h = header.offsetHeight;
+      if (h > 0) {
+        main.style.paddingTop = `${h + 18}px`;
+      }
+    }
+
+    function handleSmartHeaderScroll() {
+      const currentScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+
+      if (isAnyModalOpen() || currentScrollY <= 16) {
+        setHeaderVisibility(false);
+        lastScrollY = currentScrollY;
+        scrollTicking = false;
+        return;
+      }
+
+      const delta = currentScrollY - lastScrollY;
+
+      // Scrolling UP from anywhere (including bottom of page) -> reveal immediately
+      if (delta < -3) {
+        setHeaderVisibility(false);
+      }
+      // Scrolling DOWN past 60px -> hide smoothly
+      else if (delta > 6 && currentScrollY > 60) {
+        if (document.activeElement && (document.activeElement.id === "desktopSearchInput" || document.activeElement.id === "mobileSearchInput")) {
+          document.activeElement.blur();
+        }
+        setHeaderVisibility(true);
+      }
+
+      lastScrollY = currentScrollY;
+      scrollTicking = false;
+    }
+
+    window.addEventListener("scroll", () => {
+      if (!scrollTicking) {
+        window.requestAnimationFrame(handleSmartHeaderScroll);
+        scrollTicking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener("resize", syncMainTopOffset);
+
+    function initStorage() {
+      try {
+        const savedRate = localStorage.getItem(RATE_STORAGE_KEY);
+        if (savedRate && !isNaN(Number(savedRate)) && Number(savedRate) > 0) {
+          exchangeRate = Number(savedRate);
+        }
+        const savedItems = localStorage.getItem(STORAGE_KEY);
+        if (savedItems) {
+          const parsed = JSON.parse(savedItems);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            listings = parsed;
+            return;
+          }
+        }
+      } catch (err) {}
+      listings = JSON.parse(JSON.stringify(DEFAULT_LISTINGS));
+      saveListingsToStorage();
+    }
+
+    function saveListingsToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(listings));
+      } catch (err) {}
+    }
+
+    /* Translation Helpers */
+    const PHRASE_DICTIONARY = {
+      EN: {
+        "neuf": "new", "comme neuf": "like new", "occasion": "used", "débloqué": "unlocked",
+        "livraison": "delivery", "disponible": "available", "état": "condition", "téléphone": "phone",
+        "chaussures": "shoes", "sac": "bag", "vente": "for sale", "prix": "price",
+        "propre": "clean", "batterie": "battery", "rechargeable": "rechargeable", "service": "service"
+      },
+      ES: {
+        "neuf": "nuevo", "comme neuf": "como nuevo", "occasion": "usado", "débloqué": "liberado",
+        "livraison": "entrega", "disponible": "disponible", "état": "estado", "téléphone": "teléfono",
+        "chaussures": "zapatos", "sac": "bolso", "vente": "en venta", "prix": "precio",
+        "propre": "limpio", "batterie": "batería", "rechargeable": "recargable", "service": "servicio"
+      },
+      HT: {
+        "neuf": "nèf", "comme neuf": "tankou nèf", "occasion": "itilize", "débloqué": "debloke",
+        "livraison": "livrezon", "disponible": "disponib", "état": "eta", "téléphone": "telefòn",
+        "chaussures": "soulye", "sac": "sak", "vente": "a vann", "prix": "pri",
+        "propre": "pwòp", "batterie": "batri", "rechargeable": "rechajab", "service": "sèvis"
+      }
+    };
+
+    function offlineFallbackTranslate(text, targetLang) {
+      if (!text || targetLang === "FR") return text;
+      const dict = PHRASE_DICTIONARY[targetLang] || {};
+      let result = text;
+      Object.entries(dict).forEach(([frWord, translatedWord]) => {
+        const regex = new RegExp(`\\b${frWord}\\b`, "gi");
+        result = result.replace(regex, (match) => {
+          const isCap = match[0] === match[0].toUpperCase();
+          return isCap ? translatedWord.charAt(0).toUpperCase() + translatedWord.slice(1) : translatedWord;
+        });
+      });
+      return result;
+    }
+
+    async function fetchApiTranslation(text, targetLang) {
+      const langMap = { FR: "fr", EN: "en", ES: "es", HT: "ht" };
+      const targetCode = langMap[targetLang] || "en";
+      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|${targetCode}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        const translated = data?.responseData?.translatedText;
+        if (translated && !translated.toUpperCase().includes("MYMEMORY WARNING")) {
+          return translated;
+        }
+        throw new Error("Invalid response");
+      } catch (err) {
+        clearTimeout(timeout);
+        return offlineFallbackTranslate(text, targetLang);
+      }
+    }
+
+    function getLocalizedItemContent(item, lang = "FR") {
+      if (item.translations && item.translations[lang]) {
+        return { title: item.translations[lang].title, description: item.translations[lang].description };
+      }
+      if (lang === "FR") {
+        return { title: item.title || "", description: item.description || "" };
+      }
+      const cacheKey = `${item.id}_${lang}`;
+      if (translationCache[cacheKey]) return translationCache[cacheKey];
+      const baseTitle = item.translations?.FR?.title || item.title || "";
+      const baseDesc = item.translations?.FR?.description || item.description || "";
+      return {
+        title: offlineFallbackTranslate(baseTitle, lang),
+        description: offlineFallbackTranslate(baseDesc, lang)
+      };
+    }
+
+    async function ensureItemTranslated(item, lang, onComplete) {
+      if (lang === "FR" || (item.translations && item.translations[lang])) {
+        if (onComplete) onComplete(getLocalizedItemContent(item, lang));
+        return;
+      }
+      const cacheKey = `${item.id}_${lang}`;
+      if (translationCache[cacheKey]) {
+        if (onComplete) onComplete(translationCache[cacheKey]);
+        return;
+      }
+      const baseTitle = item.translations?.FR?.title || item.title || "";
+      const baseDesc = item.translations?.FR?.description || item.description || "";
+      const [tTitle, tDesc] = await Promise.all([
+        fetchApiTranslation(baseTitle, lang),
+        fetchApiTranslation(baseDesc, lang)
+      ]);
+      const entry = { title: tTitle, description: tDesc };
+      translationCache[cacheKey] = entry;
+      if (onComplete) onComplete(entry);
+    }
+
+    function handleCardLanguageChange(event, itemId, lang) {
+      event.stopPropagation();
+      cardLanguages[itemId] = lang;
+      const item = listings.find((i) => i.id === itemId);
+      if (!item) return;
+      renderListings();
+      if (lang !== "FR" && (!item.translations || !item.translations[lang])) {
+        ensureItemTranslated(item, lang, () => renderListings());
+      }
+    }
+
+    function handleModalLanguageChange(lang) {
+      modalTranslationLang = lang;
+      document.querySelectorAll(".modal-lang-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.langBtn === lang);
+      });
+      if (!activeDetailItem) return;
+
+      const content = getLocalizedItemContent(activeDetailItem, lang);
+      document.getElementById("detailTitle").textContent = content.title;
+      document.getElementById("detailDescription").textContent = content.description;
+
+      const statusEl = document.getElementById("detailTranslationStatus");
+      if (lang === "FR") {
+        statusEl.textContent = "";
+      } else if (!activeDetailItem.translations?.[lang] && !translationCache[`${activeDetailItem.id}_${lang}`]) {
+        statusEl.textContent = UI_TEXT.fr.translatingBadge;
+        ensureItemTranslated(activeDetailItem, lang, (translated) => {
+          if (activeDetailItem && modalTranslationLang === lang) {
+            document.getElementById("detailTitle").textContent = translated.title;
+            document.getElementById("detailDescription").textContent = translated.description;
+            statusEl.textContent = UI_TEXT.fr.translatedBadge(lang);
+          }
+        });
+      } else {
+        statusEl.textContent = UI_TEXT.fr.translatedBadge(lang);
+      }
+    }
+
+    /* Currency Formatting */
+    function formatPrice(priceUSD, targetCurrency = displayCurrency) {
+      if (targetCurrency === "HTG") {
+        return `${Math.round(priceUSD * exchangeRate).toLocaleString("fr-FR")} HTG`;
+      }
+      const formatted = priceUSD % 1 === 0 ? priceUSD.toLocaleString("en-US") : priceUSD.toFixed(2);
+      return `$${formatted} USD`;
+    }
+
+    function setDisplayCurrency(currency) {
+      displayCurrency = currency;
+      document.getElementById("btnCurrencyHTG").classList.toggle("active", currency === "HTG");
+      document.getElementById("btnCurrencyUSD").classList.toggle("active", currency === "USD");
+      document.getElementById("boostPromoPrice").textContent =
+        currency === "HTG" ? `Dès ${Math.round(2 * exchangeRate)} HTG` : "Dès $2 USD";
+      renderListings();
+      if (activeDetailItem) openDetailModal(activeDetailItem.id);
+    }
+
+    function openRateModal() {
+      setHeaderVisibility(false);
+      document.getElementById("rateInput").value = exchangeRate;
+      document.getElementById("rateModal").classList.remove("hidden");
+    }
+
+    function closeRateModal() {
+      document.getElementById("rateModal").classList.add("hidden");
+    }
+
+    function saveExchangeRate() {
+      const val = parseFloat(document.getElementById("rateInput").value);
+      if (!val || val <= 0) {
+        showToast("Veuillez entrer un taux de change valide.");
+        return;
+      }
+      exchangeRate = val;
+      try { localStorage.setItem(RATE_STORAGE_KEY, String(exchangeRate)); } catch (e) {}
+      document.getElementById("headerRateText").textContent = exchangeRate;
+      document.getElementById("mobileRateText").textContent = exchangeRate;
+      closeRateModal();
+      setDisplayCurrency(displayCurrency);
+      showToast(`Taux mis à jour : 1 USD = ${exchangeRate} HTG`);
+    }
+
+    /* Category SVG Artwork with Explicit Dimensions */
+    function getCategorySVG(category) {
+      const themes = {
+        "Electronics": { bg: "#ecfdf5", accent: "#059669", secondary: "#34d399", icon: `<rect x="72" y="34" width="56" height="92" rx="10" fill="#0f172a"/><rect x="77" y="42" width="46" height="72" rx="5" fill="#10b981"/><circle cx="100" cy="120" r="3" fill="#94a3b8"/>` },
+        "Fashion & Shoes": { bg: "#eff6ff", accent: "#2563eb", secondary: "#60a5fa", icon: `<path d="M55 102 C65 75, 92 72, 110 85 L145 96 C152 99, 152 112, 142 114 L56 114 C48 114, 48 106, 55 102 Z" fill="#2563eb"/><path d="M52 112 L146 112 L146 120 L52 120 Z" fill="#0f172a"/>` },
+        "Home & Furniture": { bg: "#fefce8", accent: "#d97706", secondary: "#fbbf24", icon: `<circle cx="100" cy="68" r="28" fill="none" stroke="#d97706" stroke-width="5"/><circle cx="100" cy="68" r="8" fill="#0f172a"/><line x1="100" y1="96" x2="100" y2="126" stroke="#0f172a" stroke-width="6"/><line x1="78" y1="126" x2="122" y2="126" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>` },
+        "Vehicles & Parts": { bg: "#f0fdf4", accent: "#16a34a", secondary: "#4ade80", icon: `<circle cx="68" cy="108" r="18" fill="none" stroke="#0f172a" stroke-width="6"/><circle cx="134" cy="108" r="18" fill="none" stroke="#0f172a" stroke-width="6"/><path d="M68 108 L92 78 L118 78 L134 108 M92 78 L84 62 L72 62" fill="none" stroke="#16a34a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>` },
+        "Food & Goods": { bg: "#fff7ed", accent: "#ea580c", secondary: "#fb923c", icon: `<rect x="76" y="46" width="48" height="76" rx="12" fill="#38bdf8"/><rect x="86" y="36" width="28" height="10" rx="3" fill="#0284c7"/><rect x="76" y="72" width="48" height="20" fill="#ffffff" opacity="0.85"/>` },
+        "Services": { bg: "#f5f3ff", accent: "#7c3aed", secondary: "#a78bfa", icon: `<path d="M74 62 L126 62 L134 114 L66 114 Z" fill="#7c3aed"/><rect x="88" y="48" width="24" height="14" rx="4" fill="none" stroke="#0f172a" stroke-width="5"/><circle cx="100" cy="88" r="8" fill="#fbbf24"/>` },
+        "Other": { bg: "#f8fafc", accent: "#475569", secondary: "#94a3b8", icon: `<rect x="68" y="54" width="64" height="58" rx="10" fill="#059669"/><path d="M68 74 L132 74 M100 54 L100 112" stroke="#ffffff" stroke-width="4"/>` }
+      };
+      const t = themes[category] || themes["Other"];
+      return `
+        <svg viewBox="0 0 200 150" width="100%" height="100%" style="display:block;width:100%;height:100%;" preserveAspectRatio="xMidYMid slice">
+          <rect width="200" height="150" fill="${t.bg}" />
+          <circle cx="165" cy="25" r="42" fill="${t.secondary}" opacity="0.2" />
+          <circle cx="30" cy="135" r="36" fill="${t.accent}" opacity="0.12" />
+          ${t.icon}
+        </svg>
+      `;
+    }
+
+    function renderCategoryPills() {
+      const container = document.getElementById("categoryPills");
+      const catLabels = UI_TEXT.fr.catLabels;
+      container.innerHTML = CATEGORIES.map((cat) => {
+        const isActive = activeCategory === cat;
+        return `<button type="button" onclick="selectCategory('${cat}')" class="cat-pill ${isActive ? "active" : ""}">${catLabels[cat] || cat}</button>`;
+      }).join("");
+    }
+
+    function selectCategory(category) {
+      activeCategory = category;
+      renderCategoryPills();
+      renderListings();
+    }
+
+    function handleFilterChange() {
+      renderListings();
+    }
+
+    const desktopSearch = document.getElementById("desktopSearchInput");
+    const mobileSearch = document.getElementById("mobileSearchInput");
+
+    function syncSearch(val) {
+      searchQuery = val.trim();
+      desktopSearch.value = val;
+      mobileSearch.value = val;
+      document.getElementById("clearDesktopSearch").classList.toggle("hidden", searchQuery.length === 0);
+      document.getElementById("clearMobileSearch").classList.toggle("hidden", searchQuery.length === 0);
+      renderListings();
+    }
+
+    desktopSearch.addEventListener("input", (e) => syncSearch(e.target.value));
+    mobileSearch.addEventListener("input", (e) => syncSearch(e.target.value));
+
+    function clearSearchInput() {
+      syncSearch("");
+    }
+
+    function resetFilters() {
+      activeCategory = "All";
+      document.getElementById("areaFilter").value = "all";
+      document.getElementById("sortFilter").value = "featured";
+      clearSearchInput();
+      renderCategoryPills();
+      renderListings();
+    }
+
+    function renderListings() {
+      const grid = document.getElementById("listingsGrid");
+      const emptyState = document.getElementById("emptyState");
+      const selectedArea = document.getElementById("areaFilter").value;
+      const sortBy = document.getElementById("sortFilter").value;
+      const t = UI_TEXT.fr;
+
+      document.getElementById("heroActiveCount").textContent = listings.length;
+
+      let filtered = listings.filter((item) => {
+        const matchesCat = activeCategory === "All" || item.category === activeCategory;
+        const matchesArea = selectedArea === "all" || item.area === selectedArea;
+        const q = searchQuery.toLowerCase();
+        const frContent = getLocalizedItemContent(item, "FR");
+        const matchesSearch =
+          q === "" ||
+          frContent.title.toLowerCase().includes(q) ||
+          frContent.description.toLowerCase().includes(q) ||
+          item.area.toLowerCase().includes(q) ||
+          (t.catLabels[item.category] || item.category).toLowerCase().includes(q) ||
+          item.seller.toLowerCase().includes(q);
+        return matchesCat && matchesArea && matchesSearch;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === "featured") {
+          if (a.featured !== b.featured) return a.featured ? -1 : 1;
+          return b.createdAt - a.createdAt;
+        } else if (sortBy === "newest") {
+          return b.createdAt - a.createdAt;
+        } else if (sortBy === "price-asc") {
+          return a.priceUSD - b.priceUSD;
+        } else if (sortBy === "price-desc") {
+          return b.priceUSD - a.priceUSD;
+        }
+        return 0;
+      });
+
+      document.getElementById("resultsCountLabel").textContent = t.showingItems(filtered.length);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      grid.innerHTML = filtered.map((item) => {
+        const cardLang = cardLanguages[item.id] || "FR";
+        const localized = getLocalizedItemContent(item, cardLang);
+        const primaryPrice = formatPrice(item.priceUSD, displayCurrency);
+        const secondaryCurrency = displayCurrency === "HTG" ? "USD" : "HTG";
+        const secondaryPrice = formatPrice(item.priceUSD, secondaryCurrency);
+        const catLabel = t.catLabels[item.category] || item.category;
+        const condLabel = t.condLabels[item.condition] || item.condition;
+
+        const visualContent = item.imageData
+          ? `<img src="${item.imageData}" alt="${localized.title}" />`
+          : getCategorySVG(item.category);
+
+        const langBtns = ["FR", "EN", "ES", "HT"].map((code) => {
+          const active = cardLang === code;
+          return `<button type="button" onclick="handleCardLanguageChange(event, ${item.id}, '${code}')" class="lang-mini-btn ${active ? "active" : ""}">${code}</button>`;
+        }).join("");
+
+        return `
+          <article onclick="openDetailModal(${item.id})" class="product-card ${item.featured ? "is-featured" : ""}">
+            <div class="card-media">
+              ${visualContent}
+              <div class="card-badges-top">
+                ${item.featured ? `<span class="badge-gold">${t.featuredBadge}</span>` : ""}
+                <span class="badge-condition">${condLabel}</span>
+              </div>
+              <span class="badge-category-bottom">${catLabel}</span>
+            </div>
+
+            <div class="card-body">
+              <div>
+                <div class="card-price-row">
+                  <span class="price-primary">${primaryPrice}</span>
+                  <span class="price-secondary">≈ ${secondaryPrice}</span>
+                </div>
+                <h3 class="card-title">${localized.title}</h3>
+                <div class="card-lang-bar">
+                  <span class="card-lang-label">Langue :</span>
+                  <div class="lang-btn-group">${langBtns}</div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="card-meta-row">
+                  <span class="card-area">
+                    <svg width="13" height="13" fill="none" stroke="#059669" stroke-width="2.3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    ${item.area}
+                  </span>
+                  <span class="card-time">${item.postedAt}</span>
+                </div>
+                <div class="card-meta-row">
+                  <span class="card-seller">${item.seller}</span>
+                  ${item.verified ? `<span class="badge-verified-mini">✓ Vérifié</span>` : `<span class="badge-local-mini">${t.detailLocalSeller}</span>`}
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    /* Post Item Modal */
+    function openPostModal(precheckFeatured = false) {
+      setHeaderVisibility(false);
+      uploadedImageBase64 = null;
+      document.getElementById("postItemForm").reset();
+      document.getElementById("itemInputCurrency").value = displayCurrency;
+      document.getElementById("itemFeaturedCheck").checked = precheckFeatured;
+      document.getElementById("imagePreviewBox").innerHTML = `
+        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      `;
+      document.getElementById("postModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePostModal() {
+      document.getElementById("postModal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        uploadedImageBase64 = e.target.result;
+        document.getElementById("imagePreviewBox").innerHTML = `<img src="${uploadedImageBase64}" alt="Aperçu" />`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handlePostSubmit(event) {
+      event.preventDefault();
+      const title = document.getElementById("itemTitle").value.trim();
+      const category = document.getElementById("itemCategory").value;
+      const condition = document.getElementById("itemCondition").value;
+      const rawPrice = parseFloat(document.getElementById("itemPrice").value);
+      const inputCurrency = document.getElementById("itemInputCurrency").value;
+      const area = document.getElementById("itemArea").value;
+      const seller = document.getElementById("itemSeller").value.trim();
+      const phone = document.getElementById("itemPhone").value.trim();
+      const description = document.getElementById("itemDescription").value.trim();
+      const featured = document.getElementById("itemFeaturedCheck").checked;
+
+      if (!title || isNaN(rawPrice) || rawPrice <= 0) return;
+
+      const priceUSD = inputCurrency === "HTG" ? rawPrice / exchangeRate : rawPrice;
+      const newListing = {
+        id: Date.now(),
+        title,
+        description,
+        priceUSD,
+        condition,
+        category,
+        area,
+        seller,
+        verified: false,
+        featured,
+        phone,
+        postedAt: "À l'instant",
+        createdAt: Date.now(),
+        imageData: uploadedImageBase64,
+        translations: { FR: { title, description } }
+      };
+
+      listings.unshift(newListing);
+      saveListingsToStorage();
+      closePostModal();
+      renderListings();
+      showToast(`"${title}" est maintenant en ligne sur OpenMache !`);
+    }
+
+    /* Item Details Modal */
+    function openDetailModal(id) {
+      const item = listings.find((entry) => entry.id === id);
+      if (!item) return;
+
+      setHeaderVisibility(false);
+      activeDetailItem = item;
+      modalTranslationLang = cardLanguages[id] || "FR";
+      document.querySelectorAll(".modal-lang-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.langBtn === modalTranslationLang);
+      });
+
+      const t = UI_TEXT.fr;
+      const localized = getLocalizedItemContent(item, modalTranslationLang);
+
+      document.getElementById("detailVisual").innerHTML = item.imageData
+        ? `<img src="${item.imageData}" alt="${localized.title}" />`
+        : getCategorySVG(item.category);
+
+      const catLabel = t.catLabels[item.category] || item.category;
+      const condLabel = t.condLabels[item.condition] || item.condition;
+
+      document.getElementById("detailBadges").innerHTML = `
+        ${item.featured ? `<span class="badge-gold">${t.featuredBadge}</span>` : ""}
+        <span class="badge-condition" style="background:#f1f5f9;">${catLabel}</span>
+        <span class="badge-condition" style="background:#ecfdf5;color:#047857;">${condLabel}</span>
+      `;
+
+      document.getElementById("detailTitle").textContent = localized.title;
+      document.getElementById("detailLocationTime").textContent = `${item.area} • ${item.postedAt}`;
+      document.getElementById("detailDescription").textContent = localized.description;
+      document.getElementById("detailTranslationStatus").textContent =
+        modalTranslationLang === "FR" ? "" : t.translatedBadge(modalTranslationLang);
+
+      const primaryPrice = formatPrice(item.priceUSD, displayCurrency);
+      const secondaryCurrency = displayCurrency === "HTG" ? "USD" : "HTG";
+      const secondaryPrice = formatPrice(item.priceUSD, secondaryCurrency);
+
+      document.getElementById("detailPrimaryPrice").textContent = primaryPrice;
+      document.getElementById("detailSecondaryPrice").textContent = `≈ ${secondaryPrice}`;
+
+      const initials = item.seller.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+      document.getElementById("detailSellerAvatar").textContent = initials || "OM";
+      document.getElementById("detailSellerName").textContent = item.seller;
+      document.getElementById("detailPhoneDisplay").textContent = item.phone;
+      document.getElementById("detailVerifiedTag").classList.toggle("hidden", !item.verified);
+
+      const boostBtn = document.getElementById("detailBoostBtn");
+      if (item.featured) {
+        boostBtn.style.background = "#fef3c7";
+        boostBtn.style.border = "1px solid #fcd34d";
+        boostBtn.style.color = "#78350f";
+        boostBtn.textContent = t.boostActiveBtn;
+      } else {
+        boostBtn.style.background = "#fffbeb";
+        boostBtn.style.border = "1px solid #fde68a";
+        boostBtn.style.color = "#78350f";
+        boostBtn.textContent = t.boostInactiveBtn;
+      }
+
+      const cleanDigits = item.phone.replace(/\D/g, "");
+      const waMessage = encodeURIComponent(
+        `Bonjour ${item.seller} ! J'ai vu votre annonce "${localized.title}" à ${primaryPrice} (${secondaryPrice}) sur OpenMache. Est-ce toujours disponible ?`
+      );
+      document.getElementById("whatsappContactBtn").href = `https://wa.me/${cleanDigits}?text=${waMessage}`;
+
+      document.getElementById("detailModal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+
+      if (modalTranslationLang !== "FR" && (!item.translations || !item.translations[modalTranslationLang])) {
+        handleModalLanguageChange(modalTranslationLang);
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detailModal").classList.add("hidden");
+      activeDetailItem = null;
+      document.body.style.overflow = "";
+    }
+
+    function toggleBoostFromDetail() {
+      if (!activeDetailItem) return;
+      activeDetailItem.featured = !activeDetailItem.featured;
+      saveListingsToStorage();
+      renderListings();
+      openDetailModal(activeDetailItem.id);
+      showToast(activeDetailItem.featured ? "Mise en avant activée !" : "Mise en avant retirée.");
+    }
+
+    function copySellerPhone() {
+      if (!activeDetailItem) return;
+      const textArea = document.createElement("textarea");
+      textArea.value = activeDetailItem.phone;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        showToast(`Numéro ${activeDetailItem.phone} copié !`);
+      } catch (err) {
+        showToast(`Téléphone : ${activeDetailItem.phone}`);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function confirmResetDemo() {
+      listings = JSON.parse(JSON.stringify(DEFAULT_LISTINGS));
+      cardLanguages = {};
+      translationCache = {};
+      saveListingsToStorage();
+      resetFilters();
+      showToast("Annonces de démonstration restaurées !");
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById("toastBox");
+      document.getElementById("toastMessage").textContent = msg;
+      box.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.remove("show"), 2800);
+    }
+
+    ["postModal", "detailModal", "rateModal"].forEach((modalId) => {
+      document.getElementById(modalId).addEventListener("click", (e) => {
+        if (e.target.id === modalId) {
+          if (modalId === "postModal") closePostModal();
+          if (modalId === "detailModal") closeDetailModal();
+          if (modalId === "rateModal") closeRateModal();
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closePostModal();
+        closeDetailModal();
+        closeRateModal();
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initStorage();
+      syncMainTopOffset();
+      lastScrollY = Math.max(0, window.scrollY || 0);
+      document.getElementById("headerRateText").textContent = exchangeRate;
+      document.getElementById("mobileRateText").textContent = exchangeRate;
+      renderCategoryPills();
+      setDisplayCurrency("HTG");
+    });
+  </script>
+</body>
+</html>

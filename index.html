@@ -7,14 +7,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #f6f7f4;
+      --bg: #f4f6f5;
       --surface: #ffffff;
-      --text: #16211c;
-      --muted: #5c6b63;
+      --text: #14201b;
+      --muted: #55665e;
       --primary: #0f766e;
       --primary-dark: #0b5a54;
-      --accent: #d97706;
-      --border: #e2e6e1;
+      --accent: #ea580c;
+      --border: #dfe5e1;
       --danger: #b91c1c;
       --radius: 14px;
     }
@@ -26,17 +26,16 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding-top: 72px;
+      padding-top: 76px;
     }
 
-    /* Smart auto-hiding top navigation bar */
     .topbar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 100;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(255, 255, 255, 0.97);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border);
       transition: transform 0.25s ease;
@@ -58,11 +57,33 @@
     }
 
     .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 800;
       font-size: 1.15rem;
-      color: var(--primary);
+      color: var(--text);
       text-decoration: none;
       letter-spacing: -0.02em;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1rem;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.22);
+    }
+
+    .brand span em {
+      font-style: normal;
+      color: var(--primary);
     }
 
     .controls {
@@ -86,7 +107,7 @@
     }
 
     .topbar select, .topbar button {
-      padding: 6px 10px;
+      padding: 7px 10px;
       border-radius: 8px;
       font-size: 0.85rem;
       width: auto;
@@ -107,6 +128,11 @@
     }
 
     .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
 
     .btn-secondary {
       background: #eef2ef;
@@ -150,13 +176,21 @@
       gap: 12px;
     }
 
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     .hero h1 {
       margin: 0;
       font-size: 1.45rem;
     }
 
     .hero p {
-      margin: 0;
+      margin: 4px 0 0;
       color: var(--muted);
       font-size: 0.95rem;
     }
@@ -268,13 +302,18 @@
       gap: 10px;
       flex-wrap: wrap;
       font-size: 0.9rem;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
     }
   </style>
 </head>
 <body>
   <header class="topbar" id="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="#top">OpenMache</a>
+      <a class="brand" href="#top">
+        <span class="logo-mark">OM</span>
+        <span>Open<em>Mache</em></span>
+      </a>
       <div class="controls">
         <select id="langSelect" aria-label="Language">
           <option value="fr" selected>FR</option>
@@ -285,7 +324,7 @@
           <option value="HTG" selected>HTG</option>
           <option value="USD">USD</option>
         </select>
-        <button class="btn-primary" id="toggleSellBtn" type="button">+ Vendre</button>
+        <button class="btn-accent" id="toggleSellBtn" type="button">+ Vendre</button>
         <button class="btn-secondary" id="toggleAuthBtn" type="button">Connexion</button>
       </div>
     </div>
@@ -293,8 +332,13 @@
 
   <main class="container" id="top">
     <section class="hero">
-      <h1 id="heroTitle">Marché local en Haïti</h1>
-      <p id="heroSubtitle">Achetez et vendez près de chez vous en HTG ou USD, avec contact direct sur WhatsApp.</p>
+      <div class="hero-top">
+        <div>
+          <h1 id="heroTitle">Marché local en Haïti</h1>
+          <p id="heroSubtitle">Achetez et vendez près de chez vous en HTG ou USD, avec contact direct sur WhatsApp.</p>
+        </div>
+        <button class="btn-accent" id="heroSellBtn" type="button">+ Ajouter un produit</button>
+      </div>
       <div class="auth-bar">
         <span id="authStatusText">Mode visiteur — connectez-vous pour publier une annonce.</span>
         <span class="meta" id="rateNote">1 USD ≈ 131 HTG</span>
@@ -315,7 +359,7 @@
           <label for="authPassword">Mot de passe</label>
           <input id="authPassword" type="password" required minlength="6" placeholder="••••••••" />
         </div>
-        <div class="field" style="display: flex; align-items: flex-end; gap: 8px;">
+        <div class="field" style="display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;">
           <button class="btn-primary" type="submit" id="signInBtn">Se connecter</button>
           <button class="btn-secondary" type="button" id="signUpBtn">Créer un compte</button>
           <button class="btn-danger" type="button" id="signOutBtn" style="display: none;">Déconnexion</button>
@@ -323,9 +367,9 @@
       </form>
     </section>
 
-    <!-- New Listing Form -->
-    <section class="panel" id="sellPanel" style="display: none;">
-      <h2 id="sellHeading">Publier un article</h2>
+    <!-- Add Product / Listing Form (Visible by default so you always see where to add products) -->
+    <section class="panel" id="sellPanel">
+      <h2 id="sellHeading">Ajouter un produit / Publier une annonce</h2>
       <form id="listingForm">
         <div class="form-grid">
           <div class="field">
@@ -360,7 +404,7 @@
             <input id="imageUrlInput" type="text" placeholder="https://..." />
           </div>
         </div>
-        <div style="margin-top: 14px; display: flex; gap: 10px;">
+        <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
           <button class="btn-primary" type="submit" id="submitListingBtn">Publier l'annonce</button>
         </div>
       </form>
@@ -388,6 +432,7 @@
         heroTitle: "Marché local en Haïti",
         heroSubtitle: "Achetez et vendez près de chez vous en HTG ou USD, avec contact direct sur WhatsApp.",
         sellBtn: "+ Vendre",
+        heroSellBtn: "+ Ajouter un produit",
         authBtn: "Connexion",
         searchPlaceholder: "Rechercher un article ou un quartier...",
         whatsapp: "WhatsApp",
@@ -395,12 +440,13 @@
         empty: "Aucune annonce publiée pour le moment.",
         guestMsg: "Mode visiteur — connectez-vous pour publier une annonce.",
         loggedInPrefix: "Connecté en tant que ",
-        loginRequired: "Connectez-vous d'abord pour publier une annonce."
+        loginRequired: "Connectez-vous ou créez un compte vendeur ci-dessus pour publier."
       },
       en: {
         heroTitle: "Local Marketplace in Haiti",
         heroSubtitle: "Buy and sell locally in HTG or USD with direct WhatsApp contact.",
         sellBtn: "+ Sell",
+        heroSellBtn: "+ Add a Product",
         authBtn: "Sign In",
         searchPlaceholder: "Search items or neighborhoods...",
         whatsapp: "WhatsApp",
@@ -408,12 +454,13 @@
         empty: "No listings available yet.",
         guestMsg: "Guest mode — sign in to post a listing.",
         loggedInPrefix: "Signed in as ",
-        loginRequired: "Please sign in first to post a listing."
+        loginRequired: "Please sign in or create a seller account above to post."
       },
       es: {
         heroTitle: "Mercado local en Haití",
         heroSubtitle: "Compra y vende cerca de ti en HTG o USD con contacto directo por WhatsApp.",
         sellBtn: "+ Vender",
+        heroSellBtn: "+ Agregar producto",
         authBtn: "Iniciar sesión",
         searchPlaceholder: "Buscar artículos o barrios...",
         whatsapp: "WhatsApp",
@@ -421,7 +468,7 @@
         empty: "No hay publicaciones por el momento.",
         guestMsg: "Modo invitado — inicia sesión para publicar.",
         loggedInPrefix: "Sesión iniciada como ",
-        loginRequired: "Inicia sesión primero para publicar un anuncio."
+        loginRequired: "Inicia sesión o crea una cuenta arriba para publicar."
       }
     };
 
@@ -471,7 +518,8 @@
       document.getElementById("heroTitle").textContent = t.heroTitle;
       document.getElementById("heroSubtitle").textContent = t.heroSubtitle;
       document.getElementById("toggleSellBtn").textContent = t.sellBtn;
-      document.getElementById("toggleAuthBtn").textContent = currentUser ? t.authBtn : t.authBtn;
+      document.getElementById("heroSellBtn").textContent = t.heroSellBtn;
+      document.getElementById("toggleAuthBtn").textContent = t.authBtn;
       searchInput.placeholder = t.searchPlaceholder;
       updateAuthUi();
       renderListings();
@@ -575,6 +623,7 @@
       if (!currentUser) {
         showStatus(t.loginRequired, true);
         authPanel.style.display = "block";
+        authPanel.scrollIntoView({ behavior: "smooth" });
         return;
       }
 
@@ -604,7 +653,6 @@
       }
 
       e.target.reset();
-      sellPanel.style.display = "none";
       showStatus("Annonce publiée avec succès !");
       await loadListings();
     });
@@ -642,15 +690,18 @@
       showStatus("Déconnecté.");
     });
 
-    document.getElementById("toggleSellBtn").addEventListener("click", () => {
-      const t = UI_TEXT[currentLang] || UI_TEXT.fr;
+    function openSellForm() {
+      sellPanel.style.display = "block";
+      sellPanel.scrollIntoView({ behavior: "smooth" });
       if (!currentUser) {
+        const t = UI_TEXT[currentLang] || UI_TEXT.fr;
         showStatus(t.loginRequired, true);
         authPanel.style.display = "block";
-        return;
       }
-      sellPanel.style.display = sellPanel.style.display === "none" ? "block" : "none";
-    });
+    }
+
+    document.getElementById("toggleSellBtn").addEventListener("click", openSellForm);
+    document.getElementById("heroSellBtn").addEventListener("click", openSellForm);
 
     document.getElementById("toggleAuthBtn").addEventListener("click", () => {
       authPanel.style.display = authPanel.style.display === "none" ? "block" : "none";
@@ -669,7 +720,6 @@
       renderListings();
     });
 
-    // Smart auto-hiding top bar on scroll
     let lastScrollY = window.scrollY;
     const topbar = document.getElementById("topbar");
     window.addEventListener("scroll", () => {

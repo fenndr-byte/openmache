@@ -2,748 +2,1854 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OpenMache — Marché Local Haïti</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>OpenMache — Achetez et Vendez Tout Localement</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* =====================================================================
+       1. RESET & DESIGN TOKENS (100% SELF-CONTAINED)
+       ===================================================================== */
     :root {
-      --bg: #f4f6f5;
-      --surface: #ffffff;
-      --text: #14201b;
-      --muted: #55665e;
-      --primary: #0f766e;
-      --primary-dark: #0b5a54;
-      --accent: #ea580c;
-      --border: #dfe5e1;
-      --danger: #b91c1c;
-      --radius: 14px;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --bg-subtle-hover: #e2e8f0;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --emerald-50: #ecfdf5;
+      --emerald-100: #d1fae5;
+      --emerald-200: #a7f3d0;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --emerald-800: #065f46;
+      --emerald-900: #064e3b;
+      --amber-50: #fffbeb;
+      --amber-100: #fef3c7;
+      --amber-200: #fde68a;
+      --amber-300: #fcd34d;
+      --amber-400: #fbbf24;
+      --amber-800: #92400e;
+      --amber-900: #78350f;
+      --amber-950: #451a03;
+      --sky-100: #e0f2fe;
+      --sky-700: #0369a1;
+      --sky-800: #075985;
+      --rose-600: #e11d48;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
+      --shadow-xl: 0 20px 44px rgba(15, 23, 42, 0.22);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
 
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding-top: 76px;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    .topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      background: rgba(255, 255, 255, 0.97);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-      transition: transform 0.25s ease;
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+      max-width: 100%;
     }
 
-    .topbar.hidden {
-      transform: translateY(-100%);
-    }
-
-    .topbar-inner {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
-
-    .logo-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 1rem;
-      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.22);
-    }
-
-    .brand span em {
-      font-style: normal;
-      color: var(--primary);
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    select, input, textarea, button {
-      font: inherit;
-    }
-
-    select, input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface);
-      color: var(--text);
-    }
-
-    .topbar select, .topbar button {
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      width: auto;
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
     }
 
     button {
       cursor: pointer;
       border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-weight: 600;
-      transition: background 0.15s ease, opacity 0.15s ease;
+      background: none;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-primary:hover { background: var(--primary-dark); }
-
-    .btn-accent {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn-secondary {
-      background: #eef2ef;
-      color: var(--text);
-    }
-
-    .btn-whatsapp {
-      background: #16a34a;
-      color: #fff;
+    a {
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 12px;
-      border-radius: 9px;
-      font-size: 0.88rem;
-      font-weight: 600;
+      color: inherit;
     }
 
-    .btn-danger {
-      background: #fee2e2;
-      color: var(--danger);
-      padding: 6px 10px;
-      font-size: 0.82rem;
+    .hidden {
+      display: none !important;
     }
 
     .container {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 16px 14px 48px;
-    }
-
-    .hero {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .hero-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .hero h1 {
-      margin: 0;
-      font-size: 1.45rem;
-    }
-
-    .hero p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .toolbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    @media (max-width: 600px) {
-      .toolbar { grid-template-columns: 1fr; }
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .panel h2 {
-      margin: 0 0 12px;
-      font-size: 1.15rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: var(--muted);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .card-img {
       width: 100%;
-      height: 180px;
-      object-fit: cover;
-      background: #e5e9e6;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding-left: 16px;
+      padding-right: 16px;
     }
 
-    .card-body {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    @media (min-width: 640px) {
+      .container {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
     }
 
-    .price {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--primary);
+    /* =====================================================================
+       2. SMART AUTO-HIDE STICKY HEADER
+       ===================================================================== */
+    .main-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(0);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
     }
 
-    .meta {
-      font-size: 0.85rem;
-      color: var(--muted);
+    .main-header.is-hidden {
+      transform: translateY(-100%);
     }
 
-    .card-actions {
+    .header-top-row {
+      min-height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      margin-top: 6px;
-      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 0;
     }
 
-    .status {
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      margin-bottom: 12px;
+    .brand-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    .brand-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      display: block;
+      line-height: 1.1;
+    }
+
+    .brand-name span {
+      color: var(--emerald-600);
+    }
+
+    .brand-tagline {
+      display: none;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @media (min-width: 640px) {
+      .brand-name { font-size: 21px; }
+      .brand-tagline { display: block; }
+    }
+
+    .desktop-search-wrap {
+      display: none;
+      flex: 1;
+      max-width: 440px;
+      position: relative;
+    }
+
+    @media (min-width: 820px) {
+      .desktop-search-wrap {
+        display: flex;
+      }
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 9px 34px 9px 36px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input:focus {
+      background: #ffffff;
+      border-color: var(--emerald-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+    }
+
+    .search-icon-left {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .currency-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-subtle);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid var(--border-light);
+    }
+
+    .currency-btn {
+      padding: 6px 9px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+
+    .currency-btn.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    }
+
+    .rate-pill-desktop {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 10px;
+      border-radius: 11px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-900);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (min-width: 1080px) {
+      .rate-pill-desktop {
+        display: inline-flex;
+      }
+    }
+
+    .btn-account-pill {
+      padding: 8px 11px;
+      border-radius: 11px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .btn-account-pill.signed-in {
+      background: var(--emerald-50);
+      border-color: var(--emerald-200);
+      color: var(--emerald-800);
+    }
+
+    .btn-post-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.24);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .btn-post-primary:hover {
+      background: var(--emerald-700);
+    }
+
+    .post-btn-suffix {
       display: none;
     }
 
-    .status.show { display: block; }
-    .status.ok { background: #dcfce7; color: #166534; }
-    .status.err { background: #fee2e2; color: #991b1b; }
+    @media (min-width: 640px) {
+      .post-btn-suffix {
+        display: inline;
+      }
+    }
 
-    .auth-bar {
+    .mobile-subbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+    }
+
+    @media (min-width: 820px) {
+      .mobile-subbar {
+        display: none;
+      }
+    }
+
+    .mobile-search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .rate-pill-mobile {
+      padding: 8px 10px;
+      border-radius: 11px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-900);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* =====================================================================
+       3. MAIN LAYOUT & COMPACT HERO BANNER
+       ===================================================================== */
+    .main-content {
+      padding-top: 124px;
+      padding-bottom: 40px;
+    }
+
+    .hero-banner {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(125deg, #064e3b 0%, #065f46 52%, #115e59 100%);
+      color: #ffffff;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 22px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-banner {
+        padding: 32px 36px;
+      }
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    @media (min-width: 960px) {
+      .hero-grid {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .hero-copy {
+      max-width: 650px;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 11px;
+      font-weight: 700;
+      color: #d1fae5;
+      margin-bottom: 12px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .hero-title {
+        font-size: 32px;
+      }
+    }
+
+    .hero-title .highlight {
+      color: var(--amber-300);
+    }
+
+    .hero-desc {
+      font-size: 14px;
+      color: rgba(236, 253, 245, 0.9);
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #d1fae5;
+    }
+
+    .hero-stat-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .boost-promo-card {
+      background: rgba(255, 255, 255, 0.11);
+      border: 1px solid rgba(252, 211, 77, 0.35);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 960px) {
+      .boost-promo-card {
+        max-width: 310px;
+        flex-shrink: 0;
+      }
+    }
+
+    .boost-promo-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
+    }
+
+    .badge-gold {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--amber-400);
+      color: var(--amber-950);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .boost-price-tag {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--amber-200);
+    }
+
+    .boost-promo-text {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.95);
+      line-height: 1.45;
+    }
+
+    .btn-boost-cta {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 11px;
+      background: var(--amber-400);
+      color: var(--amber-950);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+      transition: background 0.15s;
+    }
+
+    .btn-boost-cta:hover {
+      background: var(--amber-300);
+    }
+
+    /* =====================================================================
+       4. CATEGORY PILLS & FILTER TOOLBAR
+       ===================================================================== */
+    .filters-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .category-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .category-pills-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill {
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid var(--border-light);
+      transition: all 0.15s;
+    }
+
+    .cat-pill.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+      border-color: var(--emerald-600);
+      box-shadow: 0 3px 8px rgba(5, 150, 105, 0.22);
+    }
+
+    .filter-toolbar {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @media (min-width: 700px) {
+      .filter-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .filter-controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .select-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .select-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .filter-status-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 12px;
+    }
+
+    .results-count {
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .reset-link {
+      color: var(--text-muted);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    /* =====================================================================
+       5. RESPONSIVE PRODUCT LISTINGS GRID & CARDS
+       ===================================================================== */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 560px) {
+      .listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .listings-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1180px) {
+      .listings-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: #34d399;
+    }
+
+    .product-card.is-featured {
+      border-color: var(--amber-300);
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.28), var(--shadow-md);
+    }
+
+    .card-media {
+      position: relative;
+      width: 100%;
+      height: 175px;
+      background: var(--bg-subtle);
+      overflow: hidden;
+    }
+
+    .card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-badges-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge-condition {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--text-main);
+      font-size: 10.5px;
+      font-weight: 800;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .badge-category-bottom {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.78);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 14px 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .price-primary {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--emerald-700);
+      letter-spacing: -0.02em;
+    }
+
+    .price-secondary {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .card-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .card-lang-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding-top: 4px;
+    }
+
+    .card-lang-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .lang-btn-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .lang-mini-btn {
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      transition: all 0.12s;
+    }
+
+    .lang-mini-btn.active {
+      background: var(--emerald-600);
+      color: #ffffff;
+    }
+
+    .card-footer {
+      border-top: 1px solid var(--bg-subtle);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-area {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+      color: #334155;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-time {
+      font-size: 11px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .card-seller {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge-verified-mini {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--sky-700);
+      flex-shrink: 0;
+    }
+
+    .badge-local-mini {
+      font-size: 11px;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .empty-state-box {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-icon-circle {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 12px;
+      border-radius: 16px;
+      background: var(--bg-subtle);
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin: 0 auto 16px;
+    }
+
+    .empty-actions {
+      display: flex;
+      justify-content: center;
       gap: 10px;
       flex-wrap: wrap;
-      font-size: 0.9rem;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
+    }
+
+    /* =====================================================================
+       6. MODALS
+       ===================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+    }
+
+    .modal-card.wide {
+      max-width: 650px;
+    }
+
+    .modal-card.narrow {
+      max-width: 410px;
+      padding: 22px;
+      gap: 14px;
+    }
+
+    .modal-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--bg-subtle);
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .modal-close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(226, 232, 240, 0.85);
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .modal-body-scroll {
+      padding: 20px 22px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 540px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .form-control:focus {
+      background: #ffffff;
+      border-color: var(--emerald-500);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+    }
+
+    .photo-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .photo-preview-box {
+      width: 74px;
+      height: 74px;
+      border-radius: 16px;
+      background: var(--bg-subtle);
+      border: 2px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .photo-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .boost-checkbox-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      cursor: pointer;
+    }
+
+    .modal-footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--bg-subtle);
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.22);
+    }
+
+    .detail-hero-wrap {
+      position: relative;
+      height: 220px;
+      width: 100%;
+      background: var(--bg-subtle);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .detail-hero-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .detail-close-floating {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--text-main);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+
+    .detail-top-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .detail-price-card {
+      background: var(--emerald-50);
+      border: 1px solid var(--emerald-200);
+      padding: 10px 16px;
+      border-radius: 16px;
+    }
+
+    .detail-price-main {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--emerald-700);
+    }
+
+    .detail-price-sub {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--emerald-800);
+    }
+
+    .modal-translate-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .seller-box {
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .seller-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .safety-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--amber-50);
+      border: 1px solid var(--amber-200);
+      color: var(--amber-950);
+      font-size: 12px;
+    }
+
+    .safety-box ul {
+      margin-top: 4px;
+      padding-left: 18px;
+      color: var(--amber-900);
+    }
+
+    .contact-actions-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 540px) {
+      .contact-actions-row {
+        flex-direction: row;
+      }
+    }
+
+    .btn-whatsapp {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: var(--emerald-600);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-copy-phone {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--border-light);
+      background: #ffffff;
+      padding: 24px 0;
+      margin-top: 32px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    @media (min-width: 720px) {
+      .footer-inner {
+        flex-direction: row;
+        text-align: left;
+      }
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      z-index: 80;
+      display: flex;
+      justify-content: flex-end;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-pill {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 11px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
     }
   </style>
 </head>
 <body>
-  <header class="topbar" id="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="#top">
-        <span class="logo-mark">OM</span>
-        <span>Open<em>Mache</em></span>
-      </a>
-      <div class="controls">
-        <select id="langSelect" aria-label="Language">
-          <option value="fr" selected>FR</option>
-          <option value="en">EN</option>
-          <option value="es">ES</option>
-        </select>
-        <select id="currencySelect" aria-label="Currency">
-          <option value="HTG" selected>HTG</option>
-          <option value="USD">USD</option>
-        </select>
-        <button class="btn-accent" id="toggleSellBtn" type="button">+ Vendre</button>
-        <button class="btn-secondary" id="toggleAuthBtn" type="button">Connexion</button>
+
+  <!-- =====================================================================
+       SMART AUTO-HIDE STICKY NAVBAR
+       ===================================================================== -->
+  <header id="mainHeader" class="main-header">
+    <div class="container">
+      <div class="header-top-row">
+        <button type="button" onclick="resetFilters()" class="brand-btn">
+          <div class="brand-icon-box">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div>
+            <span class="brand-name">Open<span>Mache</span></span>
+            <span id="headerTagline" class="brand-tagline">Achetez et vendez tout localement</span>
+          </div>
+        </button>
+
+        <div class="desktop-search-wrap">
+          <svg class="search-icon-left" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+          <input
+            id="desktopSearchInput"
+            type="text"
+            class="search-input"
+            placeholder="Rechercher téléphones, chaussures, nourriture, services, Delmas..."
+            aria-label="Rechercher sur OpenMache"
+          />
+          <button type="button" id="clearDesktopSearch" onclick="clearSearchInput()" class="search-clear-btn hidden" aria-label="Effacer">✕</button>
+        </div>
+
+        <div class="header-actions">
+          <div class="currency-toggle" role="group" aria-label="Devise">
+            <button type="button" id="btnCurrencyHTG" onclick="setDisplayCurrency('HTG')" class="currency-btn active">HTG (G)</button>
+            <button type="button" id="btnCurrencyUSD" onclick="setDisplayCurrency('USD')" class="currency-btn">USD ($)</button>
+          </div>
+
+          <button type="button" onclick="openRateModal()" class="rate-pill-desktop" title="Modifier le taux de change">
+            <span>1 USD = <strong id="headerRateText">132</strong> HTG</span>
+          </button>
+
+          <button type="button" id="accountBtn" onclick="openAuthModal()" class="btn-account-pill">Compte</button>
+
+          <button type="button" onclick="openPostModal()" class="btn-post-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span id="postBtnText">Publier<span class="post-btn-suffix"> un article</span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mobile-subbar">
+        <div class="mobile-search-wrap">
+          <svg class="search-icon-left" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+          <input
+            id="mobileSearchInput"
+            type="text"
+            class="search-input"
+            placeholder="Rechercher articles ou quartiers..."
+            aria-label="Rechercher articles"
+          />
+          <button type="button" id="clearMobileSearch" onclick="clearSearchInput()" class="search-clear-btn hidden" aria-label="Effacer">✕</button>
+        </div>
+        <button type="button" onclick="openRateModal()" class="rate-pill-mobile">
+          $1=<span id="mobileRateText">132</span>G
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="container" id="top">
-    <section class="hero">
-      <div class="hero-top">
-        <div>
-          <h1 id="heroTitle">Marché local en Haïti</h1>
-          <p id="heroSubtitle">Achetez et vendez près de chez vous en HTG ou USD, avec contact direct sur WhatsApp.</p>
+  <!-- =====================================================================
+       MAIN CONTENT
+       ===================================================================== -->
+  <main id="mainContent" class="main-content container">
+
+    <section class="hero-banner">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-pill">
+            <span class="pulse-dot"></span>
+            <span id="heroBadgeText">Place de marché locale ouverte • Annonces de base 100 % gratuites</span>
+          </div>
+
+          <h1 id="heroTitleText" class="hero-title">
+            Vendez tout ce que vous avez localement — <span class="highlight">publication gratuite.</span>
+          </h1>
+
+          <p id="heroDescText" class="hero-desc">
+            Transformez vos appareils électroniques, vêtements, produits faits maison ou services du quotidien en liquidités. Publiez en 30 secondes et discutez directement avec des acheteurs proches sur WhatsApp.
+          </p>
+
+          <div class="hero-stats">
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span><strong id="heroActiveCount">8</strong> <span id="heroActiveLabel">Annonces locales actives</span></span>
+            </span>
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span id="heroZeroFeeLabel">Zéro frais de publication</span>
+            </span>
+            <span class="hero-stat-item">
+              <span class="check-circle">✓</span>
+              <span id="heroWhatsappLabel">Contact direct WhatsApp</span>
+            </span>
+          </div>
         </div>
-        <button class="btn-accent" id="heroSellBtn" type="button">+ Ajouter un produit</button>
-      </div>
-      <div class="auth-bar">
-        <span id="authStatusText">Mode visiteur — connectez-vous pour publier une annonce.</span>
-        <span class="meta" id="rateNote">1 USD ≈ 131 HTG</span>
+
+        <div class="boost-promo-card">
+          <div class="boost-promo-top">
+            <span id="boostCardBadge" class="badge-gold">★ Mise en avant</span>
+            <span id="boostPromoPrice" class="boost-price-tag">Dès 264 HTG</span>
+          </div>
+          <p id="boostCardDesc" class="boost-promo-text">
+            Vous voulez vendre plus vite ? Épinglez votre annonce en haut de l'accueil avec un badge doré <strong>En vedette</strong> pendant 7 jours.
+          </p>
+          <button type="button" id="boostCardCta" onclick="openPostModal(true)" class="btn-boost-cta">
+            Tester une annonce en vedette →
+          </button>
+        </div>
       </div>
     </section>
 
-    <div class="status" id="statusBox"></div>
+    <section class="filters-section">
+      <div id="categoryPills" class="category-pills-row"></div>
 
-    <!-- Auth Panel -->
-    <section class="panel" id="authPanel" style="display: none;">
-      <h2 id="authHeading">Connexion / Inscription vendeur</h2>
-      <form id="authForm" class="form-grid">
-        <div class="field">
-          <label for="authEmail">Email</label>
-          <input id="authEmail" type="email" required placeholder="vendeur@exemple.com" />
-        </div>
-        <div class="field">
-          <label for="authPassword">Mot de passe</label>
-          <input id="authPassword" type="password" required minlength="6" placeholder="••••••••" />
-        </div>
-        <div class="field" style="display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-primary" type="submit" id="signInBtn">Se connecter</button>
-          <button class="btn-secondary" type="button" id="signUpBtn">Créer un compte</button>
-          <button class="btn-danger" type="button" id="signOutBtn" style="display: none;">Déconnexion</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- Add Product / Listing Form (Visible by default so you always see where to add products) -->
-    <section class="panel" id="sellPanel">
-      <h2 id="sellHeading">Ajouter un produit / Publier une annonce</h2>
-      <form id="listingForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="titleInput" id="lblTitle">Titre *</label>
-            <input id="titleInput" type="text" required placeholder="Ex: Téléphone Samsung A15" />
-          </div>
-          <div class="field">
-            <label for="priceInput" id="lblPrice">Prix *</label>
-            <input id="priceInput" type="number" step="any" min="0" required placeholder="15000" />
-          </div>
-          <div class="field">
-            <label for="formCurrencySelect" id="lblCurrency">Devise</label>
-            <select id="formCurrencySelect">
-              <option value="HTG" selected>HTG</option>
-              <option value="USD">USD</option>
+      <div class="filter-toolbar">
+        <div class="filter-controls-group">
+          <div class="select-group">
+            <label for="areaFilter" id="areaLabel" class="select-label">Zone :</label>
+            <select id="areaFilter" onchange="handleFilterChange()" class="filter-select">
+              <option value="all">Toutes les zones</option>
+              <option value="Port-au-Prince">Port-au-Prince</option>
+              <option value="Pétion-Ville">Pétion-Ville</option>
+              <option value="Delmas">Delmas</option>
+              <option value="Carrefour">Carrefour</option>
+              <option value="Tabarre">Tabarre</option>
+              <option value="Cap-Haïtien">Cap-Haïtien</option>
+              <option value="Other">Autre</option>
             </select>
           </div>
-          <div class="field">
-            <label for="categoryInput" id="lblCategory">Catégorie</label>
-            <input id="categoryInput" type="text" placeholder="Électronique, Maison, Mode..." />
-          </div>
-          <div class="field">
-            <label for="neighborhoodInput" id="lblNeighborhood">Quartier / Ville</label>
-            <input id="neighborhoodInput" type="text" placeholder="Pétion-Ville, Delmas, Cap-Haïtien..." />
-          </div>
-          <div class="field">
-            <label for="whatsappInput" id="lblWhatsapp">Numéro WhatsApp</label>
-            <input id="whatsappInput" type="text" placeholder="5093XXXXXXX" />
-          </div>
-          <div class="field" style="grid-column: 1 / -1;">
-            <label for="imageUrlInput" id="lblImage">Lien de l'image (URL)</label>
-            <input id="imageUrlInput" type="text" placeholder="https://..." />
+
+          <div class="select-group">
+            <label for="sortFilter" id="sortLabel" class="select-label">Trier :</label>
+            <select id="sortFilter" onchange="handleFilterChange()" class="filter-select">
+              <option value="featured">En vedette d'abord</option>
+              <option value="newest">Plus récents</option>
+              <option value="price-asc">Prix : croissant</option>
+              <option value="price-desc">Prix : décroissant</option>
+            </select>
           </div>
         </div>
-        <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="btn-primary" type="submit" id="submitListingBtn">Publier l'annonce</button>
+
+        <div class="filter-status-group">
+          <span id="resultsCountLabel" class="results-count">Affichage de 8 articles</span>
+          <button type="button" id="resetDemoBtn" onclick="confirmResetDemo()" class="reset-link">
+            Actualiser les annonces
+          </button>
         </div>
-      </form>
+      </div>
     </section>
 
-    <!-- Search -->
-    <div class="toolbar">
-      <input id="searchInput" type="text" placeholder="Rechercher un article ou un quartier..." />
-      <button class="btn-secondary" id="refreshBtn" type="button">Actualiser</button>
-    </div>
+    <section>
+      <div id="emptyState" class="empty-state-box hidden">
+        <div class="empty-icon-circle">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+          </svg>
+        </div>
+        <h3 id="emptyTitle" class="empty-title">Aucun article ne correspond à votre recherche</h3>
+        <p id="emptyDesc" class="empty-desc">
+          Essayez d'effacer vos filtres ou soyez le premier à publier cet article dans votre quartier !
+        </p>
+        <div class="empty-actions">
+          <button type="button" onclick="resetFilters()" class="btn-secondary">Effacer les filtres</button>
+          <button type="button" onclick="openPostModal()" class="btn-primary">+ Publier un article</button>
+        </div>
+      </div>
 
-    <!-- Listings Grid -->
-    <section class="grid" id="listingsGrid"></section>
+      <div id="listingsGrid" class="listings-grid"></div>
+    </section>
+
   </main>
 
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong style="color:#0f172a;font-size:14px;">Open<span style="color:#059669;">Mache</span></strong> •
+        <span>Place de marché locale d'achat et de vente</span>
+      </div>
+      <p>Rencontrez-vous dans des lieux publics sûrs et vérifiez l'article avant de payer.</p>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       MODAL 1: POST AN ITEM (WITH FILE PHOTO PICKER)
+       ===================================================================== -->
+  <div id="postModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Publier un article à vendre</h2>
+          <p class="modal-subtitle">Choisissez une photo depuis votre appareil • Synchronisé avec Supabase</p>
+        </div>
+        <button type="button" onclick="closePostModal()" class="modal-close-btn" aria-label="Fermer">✕</button>
+      </div>
+
+      <form id="postItemForm" onsubmit="handlePostSubmit(event)" class="modal-body-scroll">
+        <div>
+          <label for="itemImageInput" class="form-label">Photo de l'article (Fichier / Galerie)</label>
+          <div class="photo-upload-row">
+            <div id="imagePreviewBox" class="photo-preview-box">
+              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <input id="itemImageInput" type="file" accept="image/*" onchange="handleImageUpload(event)" style="font-size:12px;width:100%;" />
+              <p style="font-size:11px;color:#64748b;margin-top:4px;">Sélectionnez une photo sur votre téléphone ou laissez vide pour utiliser l'illustration de la catégorie.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="itemTitle" class="form-label">Titre *</label>
+          <input id="itemTitle" type="text" required class="form-control" placeholder="Ex. : Samsung Galaxy A54, Pack d'eau fraîche, Tresse..." />
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemCategory" class="form-label">Catégorie *</label>
+            <select id="itemCategory" required class="form-control">
+              <option value="Electronics">Électronique</option>
+              <option value="Fashion & Shoes">Mode & Chaussures</option>
+              <option value="Home & Furniture">Maison & Meubles</option>
+              <option value="Vehicles & Parts">Véhicules & Pièces</option>
+              <option value="Food & Goods">Alimentation & Produits</option>
+              <option value="Services">Services</option>
+              <option value="Other">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="itemCondition" class="form-label">État *</label>
+            <select id="itemCondition" required class="form-control">
+              <option value="New">Neuf</option>
+              <option value="Like New">Comme neuf</option>
+              <option value="Used">Occasion</option>
+              <option value="Service">Service</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemPrice" class="form-label">Prix *</label>
+            <input id="itemPrice" type="number" min="1" step="any" required class="form-control" placeholder="Ex. : 5000" />
+          </div>
+
+          <div>
+            <label for="itemInputCurrency" class="form-label">Devise du prix *</label>
+            <select id="itemInputCurrency" class="form-control">
+              <option value="HTG">HTG (Gourdes - G)</option>
+              <option value="USD">USD (Dollars - $)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label for="itemArea" class="form-label">Quartier / Zone *</label>
+            <select id="itemArea" required class="form-control">
+              <option value="Port-au-Prince">Port-au-Prince</option>
+              <option value="Pétion-Ville">Pétion-Ville</option>
+              <option value="Delmas">Delmas</option>
+              <option value="Carrefour">Carrefour</option>
+              <option value="Tabarre">Tabarre</option>
+              <option value="Cap-Haïtien">Cap-Haïtien</option>
+              <option value="Other">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="itemSeller" class="form-label">Votre nom / Boutique *</label>
+            <input id="itemSeller" type="text" required class="form-control" placeholder="Ex. : Jean B. ou Lakay Électronique" />
+          </div>
+        </div>
+
+        <div>
+          <label for="itemPhone" class="form-label">Numéro WhatsApp / Téléphone *</label>
+          <input id="itemPhone" type="tel" required class="form-control" placeholder="Ex. : +509 3712 4589" />
+        </div>
+
+        <div>
+          <label for="itemDescription" class="form-label">Description *</label>
+          <textarea id="itemDescription" rows="3" required class="form-control" placeholder="Décrivez l'état, le lieu de retrait, la livraison ou les détails..."></textarea>
+        </div>
+
+        <label class="boost-checkbox-box">
+          <input id="itemFeaturedCheck" type="checkbox" style="margin-top:3px;width:16px;height:16px;accent-color:#f59e0b;" />
+          <div style="font-size:12px;">
+            <strong style="color:#451a03;display:block;">Aperçu badge mis en avant (+En vedette)</strong>
+            <span style="color:#92400e;">Épingle l'annonce en haut avec un badge doré En vedette.</span>
+          </div>
+        </label>
+
+        <div class="modal-footer-actions">
+          <button type="button" onclick="closePostModal()" class="btn-secondary">Annuler</button>
+          <button type="submit" id="submitListingBtn" class="btn-primary">Publier l'annonce</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: ITEM DETAILS & CONTACT SELLER
+       ===================================================================== -->
+  <div id="detailModal" class="modal-backdrop hidden">
+    <div class="modal-card wide">
+      <div class="detail-hero-wrap">
+        <button type="button" onclick="closeDetailModal()" class="detail-close-floating" aria-label="Fermer">✕</button>
+        <div id="detailVisual" style="width:100%;height:100%;"></div>
+      </div>
+
+      <div class="modal-body-scroll">
+        <div class="detail-top-flex">
+          <div style="flex:1;min-width:210px;">
+            <div id="detailBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+            <h2 id="detailTitle" style="font-size:20px;font-weight:900;line-height:1.25;margin-bottom:4px;">Titre</h2>
+            <p id="detailLocationTime" style="font-size:12px;color:#64748b;font-weight:600;">Delmas • Il y a 1 h</p>
+
+            <div class="modal-translate-bar">
+              <span style="font-size:11px;font-weight:700;color:#64748b;">Traduire la fiche :</span>
+              <button type="button" data-lang-btn="FR" onclick="handleModalLanguageChange('FR')" class="modal-lang-btn lang-mini-btn active">FR</button>
+              <button type="button" data-lang-btn="EN" onclick="handleModalLanguageChange('EN')" class="modal-lang-btn lang-mini-btn">EN</button>
+              <button type="button" data-lang-btn="ES" onclick="handleModalLanguageChange('ES')" class="modal-lang-btn lang-mini-btn">ES</button>
+              <button type="button" data-lang-btn="HT" onclick="handleModalLanguageChange('HT')" class="modal-lang-btn lang-mini-btn">HT</button>
+              <span id="detailTranslationStatus" style="font-size:11px;font-weight:600;color:#047857;"></span>
+            </div>
+          </div>
+
+          <div class="detail-price-card">
+            <div id="detailPrimaryPrice" class="detail-price-main">6 600 HTG</div>
+            <div id="detailSecondaryPrice" class="detail-price-sub">≈ $50 USD</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="form-label">Description</h3>
+          <p id="detailDescription" style="font-size:14px;color:#334155;line-height:1.6;"></p>
+        </div>
+
+        <div class="seller-box">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div id="detailSellerAvatar" class="seller-avatar">OM</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span id="detailSellerName" style="font-weight:800;font-size:14px;">Vendeur</span>
+                <span id="detailVerifiedTag" class="hidden" style="padding:2px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:10px;font-weight:800;">✓ Vendeur vérifié</span>
+              </div>
+              <p id="detailPhoneDisplay" style="font-size:12px;color:#64748b;font-weight:600;">+509 3700 0000</p>
+            </div>
+          </div>
+
+          <button type="button" id="detailBoostBtn" onclick="toggleBoostFromDetail()" style="padding:8px 12px;border-radius:11px;font-size:12px;font-weight:800;">
+            ★ Mettre en avant
+          </button>
+        </div>
+
+        <div class="safety-box">
+          <div style="font-weight:800;">🛡️ Conseils de sécurité pour les rencontres locales</div>
+          <ul>
+            <li>Rencontrez-vous dans des lieux publics fréquentés et bien éclairés (places, supermarchés, stations-service).</li>
+            <li>Inspectez et testez l'article soigneusement avant de payer en espèces ou par transfert mobile.</li>
+          </ul>
+        </div>
+
+        <div class="contact-actions-row">
+          <a id="whatsappContactBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+            <span>Contacter sur WhatsApp</span>
+          </a>
+
+          <button type="button" onclick="copySellerPhone()" class="btn-copy-phone">
+            <span>Copier le numéro</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: EDIT EXCHANGE RATE
+       ===================================================================== -->
+  <div id="rateModal" class="modal-backdrop hidden">
+    <div class="modal-card narrow">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 class="modal-title">Taux de change</h3>
+        <button type="button" onclick="closeRateModal()" style="color:#64748b;padding:4px;font-weight:800;">✕</button>
+      </div>
+      <p style="font-size:12.5px;color:#64748b;">
+        Ajustez le taux de conversion utilisé sur OpenMache pour afficher les prix en HTG ou en USD.
+      </p>
+      <div>
+        <label for="rateInput" class="form-label">1 USD équivaut à (HTG)</label>
+        <input id="rateInput" type="number" min="1" step="0.5" value="132" class="form-control" style="font-weight:800;font-size:16px;" />
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" onclick="closeRateModal()" class="btn-secondary">Annuler</button>
+        <button type="button" onclick="saveExchangeRate()" class="btn-primary">Mettre à jour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 4: SUPABASE SELLER ACCOUNT
+       ===================================================================== -->
+  <div id="authModal" class="modal-backdrop hidden">
+    <div class="modal-card narrow">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 class="modal-title">Compte Vendeur</h3>
+        <button type="button" onclick="closeAuthModal()" style="color:#64748b;padding:4px;font-weight:800;">✕</button>
+      </div>
+      <p id="authModalInfo" style="font-size:12.5px;color:#64748b;">
+        Connectez-vous pour synchroniser vos annonces et photos sur Supabase entre vos appareils.
+      </p>
+      <div id="authFieldsWrap">
+        <div style="margin-bottom:10px;">
+          <label for="authEmail" class="form-label">Email</label>
+          <input id="authEmail" type="email" class="form-control" placeholder="vendeur@exemple.com" />
+        </div>
+        <div>
+          <label for="authPassword" class="form-label">Mot de passe</label>
+          <input id="authPassword" type="password" class="form-control" placeholder="6 caractères minimum" />
+        </div>
+      </div>
+      <div class="modal-footer-actions">
+        <button type="button" id="authSignInBtn" onclick="signInSeller()" class="btn-primary">Se connecter</button>
+        <button type="button" id="authSignUpBtn" onclick="signUpSeller()" class="btn-secondary">Créer un compte</button>
+        <button type="button" id="authSignOutBtn" onclick="signOutSeller()" class="btn-secondary hidden">Déconnexion</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       TOAST NOTIFICATION
+       ===================================================================== -->
+  <div id="toastBox" class="toast-banner">
+    <div class="toast-pill">
+      <span style="width:9px;height:9px;border-radius:50%;background:#34d399;display:inline-block;"></span>
+      <span id="toastMessage">Annonce publiée !</span>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT APPLICATION LOGIC (REFERENCE UI + SUPABASE SYNC)
+       ===================================================================== -->
   <script>
     const SUPABASE_URL = "https://feoizjhkqxcbqdjpagua.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_cdHHDy1Vz6119RdGMXdh9Q_fimsC_BF";
-    const USD_TO_HTG = 131;
+    const STORAGE_BUCKET = "listing-images";
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+    const STORAGE_KEY = "openmache_listings_v2_fr";
+    const RATE_STORAGE_KEY = "openmache_rate_v1";
+
+    const CATEGORIES = [
+      "All",
+      "Electronics",
+      "Fashion & Shoes",
+      "Home & Furniture",
+      "Vehicles & Parts",
+      "Food & Goods",
+      "Services",
+      "Other"
+    ];
+
     const UI_TEXT = {
       fr: {
-        heroTitle: "Marché local en Haïti",
-        heroSubtitle: "Achetez et vendez près de chez vous en HTG ou USD, avec contact direct sur WhatsApp.",
-        sellBtn: "+ Vendre",
-        heroSellBtn: "+ Ajouter un produit",
-        authBtn: "Connexion",
-        searchPlaceholder: "Rechercher un article ou un quartier...",
-        whatsapp: "WhatsApp",
-        deleteBtn: "Supprimer",
-        empty: "Aucune annonce publiée pour le moment.",
-        guestMsg: "Mode visiteur — connectez-vous pour publier une annonce.",
-        loggedInPrefix: "Connecté en tant que ",
-        loginRequired: "Connectez-vous ou créez un compte vendeur ci-dessus pour publier."
-      },
-      en: {
-        heroTitle: "Local Marketplace in Haiti",
-        heroSubtitle: "Buy and sell locally in HTG or USD with direct WhatsApp contact.",
-        sellBtn: "+ Sell",
-        heroSellBtn: "+ Add a Product",
-        authBtn: "Sign In",
-        searchPlaceholder: "Search items or neighborhoods...",
-        whatsapp: "WhatsApp",
-        deleteBtn: "Delete",
-        empty: "No listings available yet.",
-        guestMsg: "Guest mode — sign in to post a listing.",
-        loggedInPrefix: "Signed in as ",
-        loginRequired: "Please sign in or create a seller account above to post."
-      },
-      es: {
-        heroTitle: "Mercado local en Haití",
-        heroSubtitle: "Compra y vende cerca de ti en HTG o USD con contacto directo por WhatsApp.",
-        sellBtn: "+ Vender",
-        heroSellBtn: "+ Agregar producto",
-        authBtn: "Iniciar sesión",
-        searchPlaceholder: "Buscar artículos o barrios...",
-        whatsapp: "WhatsApp",
-        deleteBtn: "Eliminar",
-        empty: "No hay publicaciones por el momento.",
-        guestMsg: "Modo invitado — inicia sesión para publicar.",
-        loggedInPrefix: "Sesión iniciada como ",
-        loginRequired: "Inicia sesión o crea una cuenta arriba para publicar."
+        featuredBadge: "★ En vedette",
+        boostActiveBtn: "★ En vedette actif",
+        boostInactiveBtn: "★ Mettre en avant",
+        detailLocalSeller: "Vendeur local",
+        catLabels: {
+          "All": "Tout",
+          "Electronics": "Électronique",
+          "Fashion & Shoes": "Mode & Chaussures",
+          "Home & Furniture": "Maison & Meubles",
+          "Vehicles & Parts": "Véhicules & Pièces",
+          "Food & Goods": "Alimentation & Produits",
+          "Services": "Services",
+          "Other": "Autre"
+        },
+        condLabels: {
+          "New": "Neuf",
+          "Like New": "Comme neuf",
+          "Used": "Occasion",
+          "Service": "Service"
+        },
+        showingItems: (n) => `Affichage de ${n} article${n === 1 ? "" : "s"}`,
+        translatedBadge: (lang) => `Traduit (${lang})`,
+        translatingBadge: "Traduction..."
       }
     };
 
-    let currentLang = "fr";
-    let currentCurrency = "HTG";
-    let currentUser = null;
-    let allListings = [];
-
-    const statusBox = document.getElementById("statusBox");
-    const listingsGrid = document.getElementById("listingsGrid");
-    const authPanel = document.getElementById("authPanel");
-    const sellPanel = document.getElementById("sellPanel");
-    const langSelect = document.getElementById("langSelect");
-    const currencySelect = document.getElementById("currencySelect");
-    const searchInput = document.getElementById("searchInput");
-
-    function showStatus(message, isError = false) {
-      statusBox.textContent = message;
-      statusBox.className = "status show " + (isError ? "err" : "ok");
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function formatPrice(amount, fromCurrency) {
-      const num = Number(amount) || 0;
-      let converted = num;
-      if (fromCurrency === "HTG" && currentCurrency === "USD") {
-        converted = num / USD_TO_HTG;
-      } else if (fromCurrency === "USD" && currentCurrency === "HTG") {
-        converted = num * USD_TO_HTG;
-      }
-      if (currentCurrency === "USD") {
-        return "$" + converted.toFixed(2) + " USD";
-      }
-      return Math.round(converted).toLocaleString("fr-HT") + " HTG";
-    }
-
-    function applyTranslations() {
-      const t = UI_TEXT[currentLang] || UI_TEXT.fr;
-      document.documentElement.lang = currentLang;
-      document.getElementById("heroTitle").textContent = t.heroTitle;
-      document.getElementById("heroSubtitle").textContent = t.heroSubtitle;
-      document.getElementById("toggleSellBtn").textContent = t.sellBtn;
-      document.getElementById("heroSellBtn").textContent = t.heroSellBtn;
-      document.getElementById("toggleAuthBtn").textContent = t.authBtn;
-      searchInput.placeholder = t.searchPlaceholder;
-      updateAuthUi();
-      renderListings();
-    }
-
-    function updateAuthUi() {
-      const t = UI_TEXT[currentLang] || UI_TEXT.fr;
-      const authStatusText = document.getElementById("authStatusText");
-      const signOutBtn = document.getElementById("signOutBtn");
-      if (currentUser) {
-        authStatusText.textContent = t.loggedInPrefix + (currentUser.email || "");
-        signOutBtn.style.display = "inline-block";
-      } else {
-        authStatusText.textContent = t.guestMsg;
-        signOutBtn.style.display = "none";
-      }
-    }
-
-    function getListingTitle(item) {
-      if (item.translations && typeof item.translations === "object" && item.translations[currentLang]) {
-        return item.translations[currentLang];
-      }
-      return item.title;
-    }
-
-    function renderListings() {
-      const t = UI_TEXT[currentLang] || UI_TEXT.fr;
-      const q = searchInput.value.trim().toLowerCase();
-
-      const filtered = allListings.filter((item) => {
-        const title = getListingTitle(item).toLowerCase();
-        const hood = (item.neighborhood || "").toLowerCase();
-        const cat = (item.category || "").toLowerCase();
-        return !q || title.includes(q) || hood.includes(q) || cat.includes(q);
-      });
-
-      if (!filtered.length) {
-        listingsGrid.innerHTML = `<p class="meta">${escapeHtml(t.empty)}</p>`;
-        return;
-      }
-
-      listingsGrid.innerHTML = filtered.map((item) => {
-        const cleanPhone = String(item.whatsapp || "").replace(/\D/g, "");
-        const waLink = cleanPhone
-          ? `<a class="btn-whatsapp" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${encodeURIComponent("Bonjour, je suis intéressé par : " + getListingTitle(item))}">${escapeHtml(t.whatsapp)}</a>`
-          : "";
-
-        const canDelete = currentUser && item.user_id === currentUser.id;
-        const delBtn = canDelete
-          ? `<button class="btn-danger" type="button" onclick="deleteListing('${escapeHtml(item.id)}')">${escapeHtml(t.deleteBtn)}</button>`
-          : "";
-
-        const imgHtml = item.image_url
-          ? `<img class="card-img" src="${escapeHtml(item.image_url)}" alt="${escapeHtml(getListingTitle(item))}" onerror="this.style.display='none'" />`
-          : "";
-
-        return `
-          <article class="card">
-            ${imgHtml}
-            <div class="card-body">
-              <div class="price">${escapeHtml(formatPrice(item.price, item.currency || "HTG"))}</div>
-              <strong>${escapeHtml(getListingTitle(item))}</strong>
-              <div class="meta">${escapeHtml([item.category, item.neighborhood].filter(Boolean).join(" • "))}</div>
-              <div class="card-actions">
-                ${waLink}
-                ${delBtn}
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    async function loadListings() {
-      const { data, error } = await sb
-        .from("listings")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        showStatus("Erreur de chargement : " + error.message, true);
-        return;
-      }
-      allListings = data || [];
-      renderListings();
-    }
-
-    window.deleteListing = async function(id) {
-      const { error } = await sb.from("listings").delete().eq("id", id);
-      if (error) {
-        showStatus("Erreur lors de la suppression : " + error.message, true);
-        return;
-      }
-      showStatus("Annonce supprimée.");
-      await loadListings();
-    };
-
-    document.getElementById("listingForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const t = UI_TEXT[currentLang] || UI_TEXT.fr;
-      if (!currentUser) {
-        showStatus(t.loginRequired, true);
-        authPanel.style.display = "block";
-        authPanel.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
-
-      const title = document.getElementById("titleInput").value.trim();
-      const price = Number(document.getElementById("priceInput").value);
-      const currency = document.getElementById("formCurrencySelect").value;
-      const category = document.getElementById("categoryInput").value.trim() || null;
-      const neighborhood = document.getElementById("neighborhoodInput").value.trim() || null;
-      const whatsapp = document.getElementById("whatsappInput").value.trim() || null;
-      const image_url = document.getElementById("imageUrlInput").value.trim() || null;
-
-      const { error } = await sb.from("listings").insert([{
-        user_id: currentUser.id,
-        title,
-        price,
-        currency,
-        category,
-        neighborhood,
-        whatsapp,
-        image_url,
-        translations: { [currentLang]: title }
-      }]);
-
-      if (error) {
-        showStatus("Erreur de publication : " + error.message, true);
-        return;
-      }
-
-      e.target.reset();
-      showStatus("Annonce publiée avec succès !");
-      await loadListings();
-    });
-
-    document.getElementById("authForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("authEmail").value.trim();
-      const password = document.getElementById("authPassword").value;
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        showStatus("Connexion impossible : " + error.message, true);
-        return;
-      }
-      authPanel.style.display = "none";
-      showStatus("Connecté !");
-    });
-
-    document.getElementById("signUpBtn").addEventListener("click", async () => {
-      const email = document.getElementById("authEmail").value.trim();
-      const password = document.getElementById("authPassword").value;
-      if (!email || password.length < 6) {
-        showStatus("Entrez un email et un mot de passe (6 caractères minimum).", true);
-        return;
-      }
-      const { error } = await sb.auth.signUp({ email, password });
-      if (error) {
-        showStatus("Inscription impossible : " + error.message, true);
-        return;
-      }
-      showStatus("Compte créé ! Vérifiez votre boîte mail si une confirmation est activée.");
-    });
-
-    document.getElementById("signOutBtn").addEventListener("click", async () => {
-      await sb.auth.signOut();
-      showStatus("Déconnecté.");
-    });
-
-    function openSellForm() {
-      sellPanel.style.display = "block";
-      sellPanel.scrollIntoView({ behavior: "smooth" });
-      if (!currentUser) {
-        const t = UI_TEXT[currentLang] || UI_TEXT.fr;
-        showStatus(t.loginRequired, true);
-        authPanel.style.display = "block";
-      }
-    }
-
-    document.getElementById("toggleSellBtn").addEventListener("click", openSellForm);
-    document.getElementById("heroSellBtn").addEventListener("click", openSellForm);
-
-    document.getElementById("toggleAuthBtn").addEventListener("click", () => {
-      authPanel.style.display = authPanel.style.display === "none" ? "block" : "none";
-    });
-
-    document.getElementById("refreshBtn").addEventListener("click", loadListings);
-    searchInput.addEventListener("input", renderListings);
-
-    langSelect.addEventListener("change", (e) => {
-      currentLang = e.target.value;
-      applyTranslations();
-    });
-
-    currencySelect.addEventListener("change", (e) => {
-      currentCurrency = e.target.value;
-      renderListings();
-    });
-
-    let lastScrollY = window.scrollY;
-    const topbar = document.getElementById("topbar");
-    window.addEventListener("scroll", () => {
-      const nowY = window.scrollY;
-      if (nowY > lastScrollY && nowY > 90) {
-        topbar.classList.add("hidden");
-      } else if (nowY < lastScrollY) {
-        topbar.classList.remove("hidden");
-      }
-      lastScrollY = nowY;
-    }, { passive: true });
-
-    sb.auth.onAuthStateChange((_event, session) => {
-      currentUser = session?.user || null;
-      updateAuthUi();
-      renderListings();
-    });
-
-    (async function init() {
-      const { data: { session } } = await sb.auth.getSession();
-      currentUser = session?.user || null;
-      applyTranslations();
-      await loadListings();
-    })();
-  </script>
-</body>
-</html>
+    const DEFAULT_LISTINGS = [
+      {
+        id: 101,
+        priceUSD: 440,
+        condition: "Like New",
+        category: "Electronics",
+        area: "Pétion-Ville",
+        seller: "Marc-Antoine Tech",
+        verified: true,
+        featured: true,
+        phone: "+509 3714 8820",
+        postedAt: "Il y a 1 h",
+        createdAt: Date.now() - 3600000,
+        imageData: null,
+        translations: {
+          FR: {
+            title: "iPhone 13 Pro — 256 Go Graphite (Débloqué)",
+            description: "iPhone 13 Pro débloqué tout opérateur en excellent état, santé batterie à 89 %, Face ID parfait. Livré avec chargeur rapide et coque de protection. Remise en main propre à la Place Saint-Pierre."
+          },
+          EN: {
+            title: "iPhone 13 Pro — 256GB Graphite (Unlocked)",
+            description: "Factory unlocked iPhone 13 Pro in clean condition, 89% battery health, Face ID working perfectly.
